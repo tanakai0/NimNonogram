@@ -1,3 +1,6 @@
+import std/strutils
+import constants
+
 ## CellState represents the state of a cell in the Nonogram puzzle.
 type
   CellState* = enum
@@ -30,12 +33,16 @@ proc colHints*(n: Nonogram): seq[seq[int]] {.inline.} =
 ## Parameters:
 ## - `numRows`: The number of rows in the puzzle.
 ## - `numCols`: The number of columns in the puzzle.
+## - `rowHints`: The hints for each row.
+## - `colHints`: The hints for each column.
 ##
 ## Returns:
 ## A new Nonogram object initialized with the specified dimensions.
-proc newNonogram*(numRows, numCols: int): Nonogram =
+proc newNonogram*(numRows: int, numCols: int, rowHints: seq[seq[int]], colHints: seq[seq[int]]): Nonogram =
   result.numRows = numRows
   result.numCols = numCols
+  result.rowHints = rowHints
+  result.colHints = colHints
   result.grid = newSeqOfCap[seq[CellState]](numRows)
   for i in 0..<numRows:
     result.grid.add(newSeqOfCap[CellState](numCols))
@@ -81,4 +88,58 @@ proc countStateInGrid*(n: Nonogram, state: CellState): int =
   return result
 
 
+proc parseHintLine(line: string): seq[int] =
+  var hints: seq[int] = @[]
+  for hint in line.split(','):
+    var number = parseInt(hint[0..^1])
+    hints.add(number)
+  if hints == @[0]:
+    return @[]
+  else:
+    return hints
 
+proc loadPuzzle*(filePath: string): Nonogram =
+  var 
+    n: Nonogram
+    numRows: int
+    numCols: int
+    rowHints: seq[seq[int]]
+    colHints: seq[seq[int]]
+    line: string
+    inRows: bool = false
+    inCols: bool = false
+    f : File
+  try:
+    f = open(filePath, FileMode.fmRead)
+  except :
+    echo "cannot open file"
+  while f.endOfFile == false :
+    line = strip(f.readLine())
+    if line == "":
+      continue
+    if line.startsWith("width"):
+      numCols = parseInt(line.split(' ')[1])
+    elif line.startsWith("height"):
+      numRows = parseInt(line.split(' ')[1])
+    elif line == "rows":
+      inRows = true
+      inCols = false
+    elif line == "columns":
+      inRows = false
+      inCols = true
+    elif line.contains("goal"):
+      break
+    elif inRows:
+      rowHints.add(parseHintLine(line))
+    elif inCols:
+      colHints.add(parseHintLine(line))
+  n = newNonogram(numRows, numCols, rowHints, colHints)
+  return n
+
+when isMainModule:
+  var
+    non: Nonogram = loadPuzzle(constants.ExamplePuzzlePath)
+  echo non.numRows
+  echo non.numCols
+  echo non.rowHints
+  echo non.colHints
