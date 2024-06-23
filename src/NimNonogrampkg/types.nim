@@ -1,5 +1,6 @@
-import std/strutils
+import std/[strutils, deques]
 import constants
+import times
 
 ## CellState represents the state of a cell in the Nonogram puzzle.
 type
@@ -17,6 +18,25 @@ type
     rowHints: seq[seq[int]]    # Hints of rows
     colHints: seq[seq[int]]  # Hints of colmuns
 
+# CellIndexColor is a tuple that contains the cell's index and color.
+type
+  CellIndexColor* = tuple[rowInd: int, colInd: int, color: CellState]
+
+## ColoringOrder represents order of drawing colos in each cell.
+type
+  ColoringOrder* = Deque[CellIndexColor]  
+
+type
+  NonogramSolver* = proc(n: Nonogram, args: varargs[string]): bool
+
+## WorkTable collects information to solve a puzzle.
+type
+  WorkTable* = object
+    nonogram*: Nonogram
+    startTime: float  # Start time for time measurement
+    coloringOrder*: ColoringOrder
+    solver*: NonogramSolver
+
 #" getters for hide values
 proc numRows*(n: Nonogram): int {.inline.} =
   n.numRows
@@ -26,7 +46,6 @@ proc rowHints*(n: Nonogram): seq[seq[int]] {.inline.} =
   n.rowHints
 proc colHints*(n: Nonogram): seq[seq[int]] {.inline.} =
   n.colHints
-
 
 ## newNonogram creates a new Nonogram with the specified number of rows and columns.
 ##
@@ -49,6 +68,57 @@ proc newNonogram*(numRows: int, numCols: int, rowHints: seq[seq[int]], colHints:
     for j in 0..<numCols:
       result.grid[i].add(CellState.unknown)
   return result
+
+## parseHintLine parses the string to make a hint in a line
+proc parseHintLine(line: string): seq[int] =
+  var hints: seq[int] = @[]
+  for hint in line.split(','):
+    var number = parseInt(hint)
+    hints.add(number)
+  if hints == @[0]:
+    return @[]
+  else:
+    return hints
+
+## loadPuzzle makes Nonogram instance from a .non data file
+proc loadPuzzle*(filePath: string): Nonogram =
+  var 
+    n: Nonogram
+    numRows: int
+    numCols: int
+    rowHints: seq[seq[int]]
+    colHints: seq[seq[int]]
+    line: string
+    inRows: bool = false
+    inCols: bool = false
+    f : File
+  try:
+    f = open(filePath, FileMode.fmRead)
+  except :
+    echo "cannot open file"
+  while f.endOfFile == false :
+    line = strip(f.readLine())
+    if line == "":
+      continue
+    if line.startsWith("width"):
+      numCols = parseInt(line.split(' ')[1])
+    elif line.startsWith("height"):
+      numRows = parseInt(line.split(' ')[1])
+    elif line == "rows":
+      inRows = true
+      inCols = false
+    elif line == "columns":
+      inRows = false
+      inCols = true
+    elif line.contains("goal"):
+      break
+    elif inRows:
+      rowHints.add(parseHintLine(line))
+    elif inCols:
+      colHints.add(parseHintLine(line))
+  n = newNonogram(numRows, numCols, rowHints, colHints)
+  return n
+
 
 ## Converts the Nonogram object to a string representation.
 ##
@@ -88,53 +158,17 @@ proc countStateInGrid*(n: Nonogram, state: CellState): int =
   return result
 
 
-proc parseHintLine(line: string): seq[int] =
-  var hints: seq[int] = @[]
-  for hint in line.split(','):
-    var number = parseInt(hint[0..^1])
-    hints.add(number)
-  if hints == @[0]:
-    return @[]
-  else:
-    return hints
+# Function to create a new ColoringOrder
+proc newColoringOrder*(n: Nonogram): ColoringOrder =
+  result = initDeque[CellIndexColor](initialSize = n.numRows * n.numCols)
 
-proc loadPuzzle*(filePath: string): Nonogram =
-  var 
-    n: Nonogram
-    numRows: int
-    numCols: int
-    rowHints: seq[seq[int]]
-    colHints: seq[seq[int]]
-    line: string
-    inRows: bool = false
-    inCols: bool = false
-    f : File
-  try:
-    f = open(filePath, FileMode.fmRead)
-  except :
-    echo "cannot open file"
-  while f.endOfFile == false :
-    line = strip(f.readLine())
-    if line == "":
-      continue
-    if line.startsWith("width"):
-      numCols = parseInt(line.split(' ')[1])
-    elif line.startsWith("height"):
-      numRows = parseInt(line.split(' ')[1])
-    elif line == "rows":
-      inRows = true
-      inCols = false
-    elif line == "columns":
-      inRows = false
-      inCols = true
-    elif line.contains("goal"):
-      break
-    elif inRows:
-      rowHints.add(parseHintLine(line))
-    elif inCols:
-      colHints.add(parseHintLine(line))
-  n = newNonogram(numRows, numCols, rowHints, colHints)
-  return n
+# Function to create a new WorkTable
+proc newWorkTable*(nonogram: Nonogram, solver: NonogramSolver): WorkTable =
+  result.nonogram = nonogram
+  result.startTime = cpuTime()
+  result.coloringOrder = newColoringOrder(nonogram)
+  result.solver = solver
+
 
 when isMainModule:
   var
