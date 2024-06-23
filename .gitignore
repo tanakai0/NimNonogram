@@ -1,3 +1,6 @@
 nimcache/
 nimblecache/
 htmldocs/
+
+atlas_env/
+src/nim.cfg
