@@ -1,0 +1,29 @@
+catalogue "wikipedia"
+title "Sample puzzle: E"
+by "Unknown"
+copyright "Unknown"
+license Unknown
+width 8
+height 8
+
+rows
+4
+2,2
+2,2
+8
+2
+2,2
+2,2
+4
+
+columns
+4
+6
+2, 1, 2
+1, 1, 1
+1, 1, 1
+2, 1, 2
+3, 2
+2, 1
+
+goal ""
