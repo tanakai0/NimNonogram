@@ -6,12 +6,14 @@
 # To run these tests, simply execute `nimble test`.
 
 import std/[unittest, strutils]
-import NimNonogrampkg/types
+import NimNonogrampkg/[types, constants]
 
 suite "Nonogram Tests":
 
   test "correct countStateInRow":
-    var n = newNonogram(5, 5)
+    var rowHints = @[@[2], @[2, 1], @[1, 1], @[3], @[1, 1]]
+    var colHints = @[@[2], @[2, 1], @[1, 1], @[3], @[1, 1]]
+    var n = newNonogram(5, 5, rowHints, colHints)
     n.grid[0][0] = CellState.black
     n.grid[0][1] = CellState.black
     n.grid[0][2] = CellState.white
@@ -23,7 +25,9 @@ suite "Nonogram Tests":
     check(countStateInRow(n, CellState.unknown, 0) == 1)
 
   test "correct countStateInColumn":
-    var n = newNonogram(5, 5)
+    var rowHints = @[@[2], @[2, 1], @[1, 1], @[3], @[1, 1]]
+    var colHints = @[@[2], @[2, 1], @[1, 1], @[3], @[1, 1]]
+    var n = newNonogram(5, 5, rowHints, colHints)
     n.grid[0][0] = CellState.black
     n.grid[1][0] = CellState.black
     n.grid[2][0] = CellState.white
@@ -35,7 +39,9 @@ suite "Nonogram Tests":
     check(countStateInColumn(n, CellState.unknown, 0) == 1)
 
   test "correct countStateInGrid":
-    var n = newNonogram(5, 5)
+    var rowHints = @[@[2], @[2, 1], @[1, 1], @[3], @[1, 1]]
+    var colHints = @[@[2], @[2, 1], @[1, 1], @[3], @[1, 1]]
+    var n = newNonogram(5, 5, rowHints, colHints)
     n.grid[0][0] = CellState.black
     n.grid[1][1] = CellState.black
     n.grid[2][2] = CellState.white
@@ -47,7 +53,9 @@ suite "Nonogram Tests":
     check(countStateInGrid(n, CellState.unknown) == 25 - 4)
 
   test "toString produces correct output":
-    var n = newNonogram(2, 2)
+    var rowHints = @[@[], @[1]]
+    var colHints = @[@[1], @[]]
+    var n = newNonogram(2, 2, rowHints, colHints)
     n.grid[0][0] = CellState.black
     n.grid[0][1] = CellState.white
     n.grid[1][0] = CellState.unknown
@@ -57,5 +65,13 @@ suite "Nonogram Tests":
     check(output.contains("Nonogram(rows: 2, columns: 2)\n"))
     check(output.contains("1 0 \n"))
     check(output.contains("2 1 \n"))
+
+  test "loadPuzzle produces correct output":
+    var
+      non: Nonogram = loadPuzzle(constants.ExamplePuzzlePath)
+    check(non.numRows == 8)
+    check(non.numCols == 8)
+    check(non.rowHints == @[@[4], @[2, 2], @[2, 2], @[8], @[2], @[2, 2], @[2, 2], @[4]])
+    check(non.colHints == @[@[4], @[6], @[2, 1, 2], @[1, 1, 1], @[1, 1, 1], @[2, 1, 2], @[3, 2], @[2, 1]])
 
 # To run these tests, simply execute `nimble test`.
