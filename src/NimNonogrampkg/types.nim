@@ -27,7 +27,9 @@ type
   ColoringOrder* = Deque[CellIndexColor]  
 
 type
-  NonogramSolver* = proc(n: Nonogram, args: varargs[string]): bool
+  NonogramSolver* = ref object of RootObj
+    nonogram*: Nonogram
+    coloringOrder*: ColoringOrder
 
 ## WorkTable collects information to solve a puzzle.
 type
@@ -36,6 +38,11 @@ type
     startTime: float  # Start time for time measurement
     coloringOrder*: ColoringOrder
     solver*: NonogramSolver
+
+## solve proc. starts to solve puzzle
+## This proc. will be overloaded by a subclass of NonogramSolver
+method solve*(solver: NonogramSolver): bool {.base.} = 
+  return false
 
 #" getters for hide values
 proc numRows*(n: Nonogram): int {.inline.} =
