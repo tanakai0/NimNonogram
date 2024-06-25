@@ -1,6 +1,4 @@
-import std/[strutils, deques]
-import constants
-import times
+import std/strutils
 
 ## CellState represents the state of a cell in the Nonogram puzzle.
 type
@@ -17,32 +15,6 @@ type
     grid*: seq[seq[CellState]]  # Matrix of puzzle
     rowHints: seq[seq[int]]    # Hints of rows
     colHints: seq[seq[int]]  # Hints of colmuns
-
-# CellIndexColor is a tuple that contains the cell's index and color.
-type
-  CellIndexColor* = tuple[rowInd: int, colInd: int, color: CellState]
-
-## ColoringOrder represents order of drawing colos in each cell.
-type
-  ColoringOrder* = Deque[CellIndexColor]  
-
-type
-  NonogramSolver* = ref object of RootObj
-    nonogram*: Nonogram
-    coloringOrder*: ColoringOrder
-
-## WorkTable collects information to solve a puzzle.
-type
-  WorkTable* = object
-    nonogram*: Nonogram
-    startTime: float  # Start time for time measurement
-    coloringOrder*: ColoringOrder
-    solver*: NonogramSolver
-
-## solve proc. starts to solve puzzle
-## This proc. will be overloaded by a subclass of NonogramSolver
-method solve*(solver: NonogramSolver): bool {.base.} = 
-  return false
 
 #" getters for hide values
 proc numRows*(n: Nonogram): int {.inline.} =
@@ -165,19 +137,8 @@ proc countStateInGrid*(n: Nonogram, state: CellState): int =
   return result
 
 
-# Function to create a new ColoringOrder
-proc newColoringOrder*(n: Nonogram): ColoringOrder =
-  result = initDeque[CellIndexColor](initialSize = n.numRows * n.numCols)
-
-# Function to create a new WorkTable
-proc newWorkTable*(nonogram: Nonogram, solver: NonogramSolver): WorkTable =
-  result.nonogram = nonogram
-  result.startTime = cpuTime()
-  result.coloringOrder = newColoringOrder(nonogram)
-  result.solver = solver
-
-
 when isMainModule:
+  import constants
   var
     non: Nonogram = loadPuzzle(constants.ExamplePuzzlePath)
   echo non.numRows
