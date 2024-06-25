@@ -1,4 +1,4 @@
-import nonogram, coloringOrder
+import ../[nonogram, coloringOrder]
 
 type
   NonogramSolver* = ref object of RootObj

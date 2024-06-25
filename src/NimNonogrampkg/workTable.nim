@@ -1,5 +1,5 @@
 import times
-import nonogram, coloringOrder, solvers
+import nonogram, coloringOrder, solvers/solvers
 
 
 ## WorkTable collects information to solve a puzzle.
