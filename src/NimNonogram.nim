@@ -1,5 +1,5 @@
 import std/parseopt
-import NimNonogrampkg/[solver, puzzleMaker, help]
+import NimNonogrampkg/[puzzleMaker, help, solvers/solvers]
 
 proc cli() =
   var
