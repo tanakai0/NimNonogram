@@ -6,7 +6,7 @@
 # To run these tests, simply execute `nimble test`.
 
 import std/[unittest, strutils]
-import NimNonogrampkg/[types, constants]
+import NimNonogrampkg/[nonogram, constants]
 
 suite "Nonogram Tests":
 
