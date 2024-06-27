@@ -7,10 +7,10 @@ Nonogram is a logic puzzle also called Hanjie puzzle, Picross, Griddlers, and Pi
 ## Folder Structure
 
 
-## Nonogram data
+## Nonogram data format
 Nonogram puzzle file follows [mikix format](https://github.com/mikix/nonogram-db).
 
 ## Link to Nonogram Puzzles
 - [Color and black and white Japanese crosswords on\-line](https://www.nonograms.org/)
 - [Web Paint\-by\-Number](https://webpbn.com/)
-- [パズルチャンネル \- ロジックアート\(お絵かきロジック\) 問題集 \- 一覧](https://www.puzzle-ch.com/logic/)
+- [Puzzle channel](https://www.puzzle-ch.com/logic/)
