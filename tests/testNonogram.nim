@@ -74,4 +74,17 @@ suite "Nonogram Tests":
     check(non.rowHints == @[@[4], @[2, 2], @[2, 2], @[8], @[2], @[2, 2], @[2, 2], @[4]])
     check(non.colHints == @[@[4], @[6], @[2, 1, 2], @[1, 1, 1], @[1, 1, 1], @[2, 1, 2], @[3, 2], @[2, 1]])
 
+  test "check checkMinimalHints":
+    var rowHints = @[@[2, 2], @[2, 1], @[1, 1], @[3], @[1, 1]]
+    var colHints = @[@[2], @[2, 1], @[1, 1], @[3], @[1, 1]]
+    discard newNonogram(5, 5, rowHints, colHints)
+
+  test "checkMinimalHints raises exception on invalid hints":
+    var rowHints = @[@[2, 3], @[2, 1], @[1, 1], @[6], @[1, 1]]  # Invalid row hint
+    var colHints = @[@[2], @[2, 1], @[1, 1], @[3], @[1, 1]]
+    expect ValueError:
+      discard newNonogram(5, 5, rowHints, colHints)
+
+
+
 # To run these tests, simply execute `nimble test`.

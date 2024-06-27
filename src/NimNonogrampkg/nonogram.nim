@@ -1,4 +1,5 @@
 import std/strutils
+import math
 
 ## CellState represents the state of a cell in the Nonogram puzzle.
 type
@@ -33,6 +34,23 @@ proc setCellState*(nonogram: var Nonogram, row: int, col: int, state: CellState)
   else:
     return false
 
+
+proc checkMinimalHints*(nono: Nonogram): bool =
+  if nono.rowHints.len != nono.numRows or nono.colHints.len != nono.numCols:
+    raise newException(ValueError, "len(rowHints) != numRows or len(colHints) != numCols")
+  
+  # Check obvious contradiction about length of elements
+  for hint in nono.rowHints:
+    if sum(hint) + len(hint) - 1 > nono.numCols:
+      raise newException(ValueError, "Contradiction about row description!")
+  
+  for hint in nono.colHints:
+    if sum(hint) + len(hint) - 1 > nono.numRows:
+      raise newException(ValueError, "Contradiction about column description!")
+  
+  return true
+
+
 ## newNonogram creates a new Nonogram with the specified number of rows and columns.
 ##
 ## Parameters:
@@ -48,6 +66,7 @@ proc newNonogram*(numRows: int, numCols: int, rowHints: seq[seq[int]], colHints:
   result.numCols = numCols
   result.rowHints = rowHints
   result.colHints = colHints
+  discard checkMinimalHints(result)
   result.grid = newSeqOfCap[seq[CellState]](numRows)
   for i in 0..<numRows:
     result.grid.add(newSeqOfCap[CellState](numCols))
@@ -103,6 +122,7 @@ proc loadPuzzle*(filePath: string): Nonogram =
     elif inCols:
       colHints.add(parseHintLine(line))
   n = newNonogram(numRows, numCols, rowHints, colHints)
+  discard checkMinimalHints(result)
   return n
 
 
