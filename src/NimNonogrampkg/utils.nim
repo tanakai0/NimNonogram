@@ -5,9 +5,9 @@ import nonogram
 proc row2hint*(row: seq[CellState]): seq[int] =
   var
     hint: seq[int] = @[]
-    count = 0
-    black = CellState.black
-    white = CellState.white
+    count: int = 0
+    black: CellState = CellState.black
+    white: CellState = CellState.white
 
   for cell in row:
     if cell == black:
