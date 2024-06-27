@@ -5,13 +5,13 @@ import nonogram
 type
   CellIndexColor* = tuple[rowInd: int, colInd: int, color: CellState]
 
-## ColoringOrder represents order of drawing colos in each cell.
+## ColoringLog represents order of drawing colos in each cell.
 type
-  ColoringOrder* = Deque[CellIndexColor]  
+  ColoringLog* = Deque[CellIndexColor]  
 
 
-# Function to create a new ColoringOrder
-proc newColoringOrder*(n: Nonogram): ColoringOrder =
+# Function to create a new ColoringLog
+proc newColoringLog*(n: Nonogram): ColoringLog =
   result = initDeque[CellIndexColor](initialSize = n.numRows * n.numCols)
   return result
 
