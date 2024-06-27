@@ -11,7 +11,6 @@ type
     coloringOrder*: ColoringOrder
     solver*: NonogramSolver
 
-
 # Function to create a new WorkTable
 proc newWorkTable*(nonogram: Nonogram, solver: NonogramSolver): WorkTable =
   result.nonogram = nonogram

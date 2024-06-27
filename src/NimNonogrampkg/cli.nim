@@ -1,5 +1,13 @@
 import std/parseopt
-import puzzleMaker, help, solvers/solvers
+import constants, nonogram, puzzleMaker, help, solvers/solvers, workTable
+
+proc solveNonogram*(filePath: string) = 
+    echo constants.ExamplePuzzlePath
+    var
+        nonogram: Nonogram = loadPuzzle(constants.ExamplePuzzlePath)
+        solver: NonogramSolver = newTestNonogramSolver("test")
+        workTable: WorkTable = newWorkTable(nonogram, solver)
+    echo "nonogram size = (", workTable.nonogram.numRows, ", ", workTable.nonogram.numCols, ")"
 
 proc cli*() =
   var
@@ -39,7 +47,7 @@ proc cli*() =
       echo "Error: --solve requires a file path."
       showHelp()
       quit(1)
-    solve(filePath)
+    solveNonogram(filePath)
   elif makePuzzleFlag:
     if imagePath == "":
       echo "Error: --make_puzzle requires an image path."

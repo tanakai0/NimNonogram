@@ -13,4 +13,5 @@ type
 # Function to create a new ColoringOrder
 proc newColoringOrder*(n: Nonogram): ColoringOrder =
   result = initDeque[CellIndexColor](initialSize = n.numRows * n.numCols)
+  return result
 
