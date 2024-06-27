@@ -1,5 +1,6 @@
-import nonogram
+import math
 
+import nonogram
 
 proc row2hint*(row: seq[CellState]): seq[int] =
   var
@@ -33,3 +34,8 @@ proc isSolved*(nono: Nonogram): bool =
   return true
 
 
+proc degreeOfFreedom*(dimension: int, hint: seq[int]): int =
+  let
+    k = hint.len
+    b = sum(hint)
+  return fac(dimension-b+1) div (fac(dimension - b + 1 - k) * fac(k))

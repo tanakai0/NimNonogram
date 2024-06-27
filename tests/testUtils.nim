@@ -34,3 +34,9 @@ suite "Utils Tests":
     check(isSolved(nono) == true)
     nono.grid[0][0] = black
     check(isSolved(nono) == false)
+
+  test "correct degreeOfFreedom":
+    var
+      dimension: int = 10
+      hint: seq[int] = @[2, 3]
+    check(degreeOfFreedom(dimension, hint) == 15)
