@@ -143,6 +143,11 @@ proc countStateInGrid*(n: Nonogram, state: CellState): int =
         result += 1
   return result
 
+proc getCol*(grid: seq[seq[CellState]], col: int): seq[CellState] =
+  result = newSeqOfCap[CellState](grid.len)
+  for row in grid:
+    result.add(row[col])
+
 
 when isMainModule:
   import constants
