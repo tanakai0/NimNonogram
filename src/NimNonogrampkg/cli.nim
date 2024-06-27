@@ -2,7 +2,6 @@ import std/parseopt
 import constants, nonogram, puzzleMaker, help, solvers/solvers, workTable
 
 proc solveNonogram*(filePath: string) = 
-    echo constants.ExamplePuzzlePath
     var
         nonogram: Nonogram = loadPuzzle(constants.ExamplePuzzlePath)
         solver: NonogramSolver = newTestNonogramSolver("test")
