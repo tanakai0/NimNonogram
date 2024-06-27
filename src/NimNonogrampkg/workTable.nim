@@ -1,5 +1,5 @@
 import times
-import nonogram, coloringOrder, solvers/solvers
+import nonogram, coloringLog, solvers/solvers
 
 
 ## WorkTable collects information to solve a puzzle.
@@ -8,14 +8,14 @@ type
     nonogram*: Nonogram
     startTime: float  # Start time for time measurement
     endTime: float  # End time for time measurement
-    coloringOrder*: ColoringOrder
+    coloringLog*: ColoringLog
     solver*: NonogramSolver
 
 # Function to create a new WorkTable
 proc newWorkTable*(nonogram: Nonogram, solver: NonogramSolver): WorkTable =
   result.nonogram = nonogram
   result.startTime = cpuTime()
-  result.coloringOrder = newColoringOrder(nonogram)
+  result.coloringLog = newColoringLog(nonogram)
   result.solver = solver
   return result
 
