@@ -26,6 +26,13 @@ proc rowHints*(n: Nonogram): seq[seq[int]] {.inline.} =
 proc colHints*(n: Nonogram): seq[seq[int]] {.inline.} =
   n.colHints
 
+proc setCellState*(nonogram: var Nonogram, row: int, col: int, state: CellState): bool = 
+  if nonogram.grid[row][col] == unknown:
+    nonogram.grid[row][col] = state
+    return true
+  else:
+    return false
+
 ## newNonogram creates a new Nonogram with the specified number of rows and columns.
 ##
 ## Parameters:
