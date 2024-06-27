@@ -121,6 +121,17 @@ proc toString*(n: Nonogram): string =
     result.add("\n")
   return result
 
+proc rendering*(n: Nonogram): string =
+  result = "Nonogram(rows: " & $n.numRows & ", columns: " & $n.numCols & ")\n"
+  for row in n.grid:
+    for cell in row:
+      case cell
+      of CellState.white: result.add("\u{2591}\u{2591}")
+      of CellState.black: result.add("\u{2593}\u{2593}")
+      of CellState.unknown: result.add("  ")
+    result.add("\n")
+  return result
+
 ## countStateInRow counts the number of specific state in a row.
 proc countStateInRow*(n: Nonogram, state: CellState, i : int): int = 
   for cell in n.grid[i]:
