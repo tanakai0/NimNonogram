@@ -3,17 +3,17 @@ import NimNonogrampkg/[nonogram, constants, utils]
 
 suite "Utils Tests":
 
-  test "correct row2hint":
+  test "correct line2hint":
     let
       row1: seq[CellState] = @[white, white, black, black, black, black, white, white]
       row2: seq[CellState] = @[white, black, black, white, white, black, black, black]
       row3: seq[CellState] = @[black, black, black, black, black, black, black, black]
       row4: seq[CellState] = @[white, white, white, white, white, white, white, white]
     
-    check(row2hint(row1) == @[4])
-    check(row2hint(row2) == @[2, 3])
-    check(row2hint(row3) == @[8])
-    check(row2hint(row4) == newSeq[int]())
+    check(line2hint(row1) == @[4])
+    check(line2hint(row2) == @[2, 3])
+    check(line2hint(row3) == @[8])
+    check(line2hint(row4) == newSeq[int]())
 
   test "correct isSolved":
     var

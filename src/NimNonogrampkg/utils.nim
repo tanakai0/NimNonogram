@@ -2,14 +2,14 @@ import math
 
 import nonogram
 
-proc row2hint*(row: seq[CellState]): seq[int] =
+proc line2hint*(line: seq[CellState]): seq[int] =
   var
     hint: seq[int] = @[]
     count: int = 0
     black: CellState = CellState.black
     white: CellState = CellState.white
 
-  for cell in row:
+  for cell in line:
     if cell == black:
       count += 1
     elif cell == white and count > 0:
@@ -26,10 +26,10 @@ proc isSolved*(nono: Nonogram): bool =
   if nono.countStateInGrid(unknown) != 0:
     return false
   for i in 0..<nono.numRows:
-    if row2hint(nono.grid[i]) != nono.rowHints[i]:
+    if line2hint(nono.grid[i]) != nono.rowHints[i]:
       return false
   for i in 0..<nono.numCols:
-    if row2hint(nono.grid.getCol(i)) != nono.colHints[i]:
+    if line2hint(nono.grid.getCol(i)) != nono.colHints[i]:
       return false
   return true
 
