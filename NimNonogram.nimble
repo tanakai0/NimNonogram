@@ -13,3 +13,6 @@ bin           = @["NimNonogram"]
 
 requires "nim >= 2.0.4"
 
+# tasks
+task CLIsolve, "This is a test of CLI":
+  exec "NimNonogram.exe --solve:db/example.non"
