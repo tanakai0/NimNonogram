@@ -1,5 +1,4 @@
 import times
-import std/deques
 import nonogram, coloringLog
 
 ## WorkTable collects information to solve a puzzle.
