@@ -37,10 +37,21 @@ proc newWorkTable*(nonogram: Nonogram): WorkTable =
 proc stopTimer*(workTable: var WorkTable) =
   workTable.endTime = cpuTime() - workTable.startTime
 
-## updateCellState will do three jobs
-## 1. Change the cell state from unkown to black or white
-## 2. Record the coloringLog
-## 3. Update the counts of unkown cells
+
+## 
+## updateCellState performs three tasks:
+## 1. Changes the cell state from unknown to black or white.
+## 2. Records the coloring in the coloringLog.
+## 3. Updates the counts of unknown cells in the WorkTable.
+##
+## Parameters:
+## - workTable: The WorkTable object.
+## - row: The row index of the cell to be updated.
+## - col: The column index of the cell to be updated.
+## - state: The desired state to set the cell.
+##
+## Returns:
+## - bool: True if the cell state was successfully updated and logged, false otherwise.
 proc updateCellState*(workTable: var WorkTable, row: int, col: int, state: CellState): bool = 
   if workTable.nonogram.setCellState(row, col, state):
     workTable.coloringLog.push(row, col, state)
@@ -50,3 +61,36 @@ proc updateCellState*(workTable: var WorkTable, row: int, col: int, state: CellS
     return true
   else:
     return false
+
+## updateRowStates updates the states of an entire row in the Nonogram grid.
+## It uses updateCellState to set each cell in the row and update the WorkTable accordingly.
+##
+## Parameters:
+## - workTable: The WorkTable object.
+## - row: The row index of the cells to be updated.
+## - states: A sequence of CellState values to set for the specified row.
+##
+## Returns:
+## - bool: True if at least one cell state was successfully updated, false otherwise.
+proc updateRowStates*(workTable: var WorkTable, row: int, states: seq[CellState]): bool = 
+  var updateAtLeastOne: bool = false
+  for col in 0 ..< workTable.nonogram.numCols:
+    updateAtLeastOne = (updateAtLeastOne or updateCellState(workTable, row, col, states[col])) 
+  return updateAtLeastOne
+
+
+## updateColStates updates the states of an entire col in the Nonogram grid.
+## It uses updateCellState to set each cell in the col and update the WorkTable accordingly.
+##
+## Parameters:
+## - workTable: The WorkTable object.
+## - col: The col index of the cells to be updated.
+## - states: A sequence of CellState values to set for the specified col.
+##
+## Returns:
+## - bool: True if at least one cell state was successfully updated, false otherwise.
+proc updateColStates*(workTable: var WorkTable, col: int, states: seq[CellState]): bool = 
+  var updateAtLeastOne: bool = false
+  for row in 0 ..< workTable.nonogram.numRows:
+    updateAtLeastOne = (updateAtLeastOne or updateCellState(workTable, row, col, states[row])) 
+  return updateAtLeastOne
