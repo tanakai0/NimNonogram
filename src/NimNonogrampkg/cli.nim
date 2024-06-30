@@ -1,5 +1,5 @@
 import std/parseopt
-import nonogram, puzzleMaker, help, solvers/solvers, workTable
+import nonogram, puzzleMaker, help, solverspkg/solvers, workTable
 
 proc solveNonogram*(filePath: string) = 
     var
