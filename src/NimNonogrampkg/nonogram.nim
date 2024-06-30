@@ -17,7 +17,7 @@ type
     rowHints: seq[seq[int]]    # Hints of rows
     colHints: seq[seq[int]]  # Hints of colmuns
 
-#" getters for hide values
+## getters for hide values
 proc numRows*(n: Nonogram): int {.inline.} =
   n.numRows
 proc numCols*(n: Nonogram): int {.inline.} =
@@ -27,10 +27,26 @@ proc rowHints*(n: Nonogram): seq[seq[int]] {.inline.} =
 proc colHints*(n: Nonogram): seq[seq[int]] {.inline.} =
   n.colHints
 
+
+## setCellState attempts to set the state of a specified cell in the Nonogram grid.
+## If the cell is currently unknown, it sets the cell to the given state and returns true.
+## If the cell already has a different state, it raises a ValueError.
+## If the cell already has the same state, it returns false.
+##
+## Parameters:
+## - nonogram: The Nonogram object.
+## - row: The row index of the cell to be set.
+## - col: The column index of the cell to be set.
+## - state: The desired state to set the cell.
+##
+## Returns:
+## - bool: True if the cell state was successfully changed, false otherwise.
 proc setCellState*(nonogram: var Nonogram, row: int, col: int, state: CellState): bool = 
   if nonogram.grid[row][col] == unknown:
     nonogram.grid[row][col] = state
     return true
+  elif nonogram.grid[row][col] != state:
+    raise newException(ValueError, "nonogram.grid[row][col]("&($(nonogram.grid[row][col]))&") != state("&($state)&")")
   else:
     return false
 
