@@ -44,7 +44,7 @@ proc stopTimer*(workTable: var WorkTable) =
 ## 3. Update the counts of unkown cells
 proc updateCellState*(workTable: var WorkTable, row: int, col: int, state: CellState): bool = 
   if workTable.nonogram.setCellState(row, col, state):
-    workTable.coloringLog.addLast((rowInd: row, colInd: col, color: state))
+    workTable.coloringLog.push(row, col, state)
     workTable.totalUnknown -= 1
     workTable.rowUnknown[row] -= 1
     workTable.colUnknown[col] -= 1
