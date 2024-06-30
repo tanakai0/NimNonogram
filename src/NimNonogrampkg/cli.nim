@@ -1,12 +1,12 @@
 import std/parseopt
-import constants, nonogram, puzzleMaker, help, solvers/solvers, workTable
+import nonogram, puzzleMaker, help, solvers/solvers, workTable
 
 proc solveNonogram*(filePath: string) = 
     var
-        nonogram: Nonogram = loadPuzzle(constants.ExamplePuzzlePath)
-        solver: NonogramSolver = newTestNonogramSolver("test")
-        workTable: WorkTable = newWorkTable(nonogram, solver)
-    echo "nonogram size = (", workTable.nonogram.numRows, ", ", workTable.nonogram.numCols, ")"
+        nonogram: Nonogram = loadPuzzle(filePath)
+        workTable: WorkTable = newWorkTable(nonogram)
+        solver: NonogramSolver = newTestNonogramSolver(workTable, "test")
+    echo "nonogram size = (", solver.workTable.nonogram.numRows, ", ", solver.workTable.nonogram.numCols, ")"
 
 proc cli*() =
   var
