@@ -3,6 +3,8 @@ import ../workTable
 type
   NonogramSolver* = ref object of RootObj
     workTable*: WorkTable
+    detectContradiction*: bool = false
+    findMultipleSolutions*: bool = false
 
 type
   TestNonogramSolver* = ref object of NonogramSolver
@@ -29,3 +31,4 @@ when isMainModule:
   let wt = WorkTable()
   let solver = newTestNonogramSolver(wt, "test")
   discard solver.solve()
+  echo solver.detectContradiction
