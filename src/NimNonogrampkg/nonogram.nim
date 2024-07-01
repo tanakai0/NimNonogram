@@ -42,7 +42,9 @@ proc colHints*(n: Nonogram): seq[seq[int]] {.inline.} =
 ## Returns:
 ## - bool: True if the cell state was successfully changed, false otherwise.
 proc setCellState*(nonogram: var Nonogram, row: int, col: int, state: CellState): bool = 
-  if nonogram.grid[row][col] == unknown:
+  if state == unknown:
+    return false
+  elif nonogram.grid[row][col] == unknown:
     nonogram.grid[row][col] = state
     return true
   elif nonogram.grid[row][col] != state:
