@@ -78,7 +78,6 @@ proc updateRowStates*(workTable: var WorkTable, row: int, states: seq[CellState]
     updateAtLeastOne = (updateAtLeastOne or updateCellState(workTable, row, col, states[col])) 
   return updateAtLeastOne
 
-
 ## updateColStates updates the states of an entire col in the Nonogram grid.
 ## It uses updateCellState to set each cell in the col and update the WorkTable accordingly.
 ##
@@ -94,3 +93,10 @@ proc updateColStates*(workTable: var WorkTable, col: int, states: seq[CellState]
   for row in 0 ..< workTable.nonogram.numRows:
     updateAtLeastOne = (updateAtLeastOne or updateCellState(workTable, row, col, states[row])) 
   return updateAtLeastOne
+
+
+proc updateLineStates*(workTable: var WorkTable, lineIndex: int, states: seq[CellState], asRow: bool): bool = 
+  if asRow:
+    return updateRowStates(workTable, lineIndex, states)
+  else:
+    return updateColStates(workTable, lineIndex, states)
