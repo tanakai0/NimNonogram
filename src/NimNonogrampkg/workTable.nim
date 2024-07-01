@@ -73,9 +73,15 @@ proc updateCellState*(workTable: var WorkTable, row: int, col: int, state: CellS
 ## Returns:
 ## - bool: True if at least one cell state was successfully updated, false otherwise.
 proc updateRowStates*(workTable: var WorkTable, row: int, states: seq[CellState]): bool = 
-  var updateAtLeastOne: bool = false
+  var
+    updateAtLeastOne: bool = false
+    updateResult: bool
   for col in 0 ..< workTable.nonogram.numCols:
-    updateAtLeastOne = (updateAtLeastOne or updateCellState(workTable, row, col, states[col])) 
+    updateResult = workTable.updateCellState(row, col, states[col])
+    updateAtLeastOne = (updateAtLeastOne or updateResult)
+    # updateAtLeastOne = (updateAtLeastOne or workTable.updateCellState(row, col, states[col]))  will not work as the way you want.
+    # Nim uses the short-circuit evaluation?
+    # If the updateAtLeastOne is true, workTable.updateCellState(row, col, states[col]) is not evaluated. So the proc will not be activated.
   return updateAtLeastOne
 
 ## updateColStates updates the states of an entire col in the Nonogram grid.
@@ -89,9 +95,12 @@ proc updateRowStates*(workTable: var WorkTable, row: int, states: seq[CellState]
 ## Returns:
 ## - bool: True if at least one cell state was successfully updated, false otherwise.
 proc updateColStates*(workTable: var WorkTable, col: int, states: seq[CellState]): bool = 
-  var updateAtLeastOne: bool = false
+  var 
+    updateAtLeastOne: bool = false
+    updateResult: bool
   for row in 0 ..< workTable.nonogram.numRows:
-    updateAtLeastOne = (updateAtLeastOne or updateCellState(workTable, row, col, states[row])) 
+    updateResult = workTable.updateCellState(row, col, states[row])
+    updateAtLeastOne = (updateAtLeastOne or updateResult)
   return updateAtLeastOne
 
 
