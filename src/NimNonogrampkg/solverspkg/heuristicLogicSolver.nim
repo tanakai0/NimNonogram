@@ -12,8 +12,13 @@ import ../[utils, nonogram, workTable]
 type
   HeuristicPreprocessingSolver* = ref object of NonogramSolver
 
-proc newHeuristicPreprocessingSolver*(workTable: var WorkTable): HeuristicPreprocessingSolver = 
+proc newHeuristicPreprocessingSolver*(workTable: WorkTable): HeuristicPreprocessingSolver = 
   result = HeuristicPreprocessingSolver(workTable: workTable)
+  return result
+
+proc newHeuristicPreprocessingSolver*(filePath: string): HeuristicPreprocessingSolver = 
+  var wt: WorkTable = newWorkTable(filePath)
+  result = HeuristicPreprocessingSolver(workTable: wt)
   return result
 
 proc preprocessingLine*(workTable: var WorkTable, lineIndex: int, asRow: bool) = 
