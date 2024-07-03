@@ -14,8 +14,18 @@ proc newNonogramSolver*(workTable: WorkTable): NonogramSolver =
   result = NonogramSolver(workTable: workTable)
   return result 
 
+proc newNonogramSolver*(filePath: string): NonogramSolver = 
+  var wt: WorkTable = newWorkTable(filePath)
+  result = NonogramSolver(workTable: wt)
+  return result 
+
 proc newTestNonogramSolver*(workTable: WorkTable, param1: string): TestNonogramSolver = 
   result = TestNonogramSolver(workTable: workTable, param1: param1)
+  return result
+
+proc newTestNonogramSolver*(filePath: string, param1: string): TestNonogramSolver = 
+  var wt: WorkTable = newWorkTable(filePath)
+  result = TestNonogramSolver(workTable: wt, param1: param1)
   return result
 
 ## solve proc. starts to solve puzzle
