@@ -42,9 +42,7 @@ suite "heuristicLogicSolver Tests":
 
   test "correct HeuristicPreprocessingSolver":
     var
-      nono: Nonogram = loadPuzzle(constants.ExamplePuzzlePath)
-      wt: WorkTable = newWorkTable(nono)
-      solver: HeuristicPreprocessingSolver = newHeuristicPreprocessingSolver(wt)
+      solver: HeuristicPreprocessingSolver = newHeuristicPreprocessingSolver(constants.ExamplePuzzlePath)
       preprocessedGrid: seq[seq[CellState]] = 
         @[@[unknown, unknown, unknown, unknown, unknown, unknown, unknown, unknown], 
           @[unknown, unknown, black  , unknown, unknown, black  , unknown, unknown], 

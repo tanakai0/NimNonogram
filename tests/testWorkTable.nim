@@ -5,8 +5,7 @@ suite "WorkTable Tests":
 
   test "test updateCellState":
     var
-      nono: Nonogram = loadPuzzle(constants.ExamplePuzzlePath)
-      wt: WorkTable = newWorkTable(nono)
+      wt: WorkTable = newWorkTable(constants.ExamplePuzzlePath)
 
     check(wt.totalUnknown == 64)
     check(wt.rowUnknown == @[8, 8, 8, 8, 8, 8, 8, 8])
@@ -26,8 +25,7 @@ suite "WorkTable Tests":
 
 test "test stopTimer":
   var
-    nono: Nonogram = loadPuzzle(constants.ExamplePuzzlePath)
-    wt: WorkTable = newWorkTable(nono)
+    wt: WorkTable = newWorkTable(constants.ExamplePuzzlePath)
     
   # Simulate some work by sleeping for 1 second
   sleep(100)  
