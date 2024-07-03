@@ -33,6 +33,24 @@ proc newWorkTable*(nonogram: Nonogram): WorkTable =
 
   return result
 
+## Function to create a new WorkTable
+proc newWorkTable*(filePath: string): WorkTable =
+  var nonogram: Nonogram = loadPuzzle(filePath)
+  result.nonogram = nonogram
+  result.startTime = cpuTime()
+  result.endTime = 0.0
+  result.coloringLog = newColoringLog(nonogram)
+  result.totalUnknown = nonogram.numRows * nonogram.numCols
+  result.rowUnknown = newSeq[int](nonogram.numRows)
+  result.colUnknown = newSeq[int](nonogram.numCols)
+  
+  for row in 0..<nonogram.numRows:
+    result.rowUnknown[row] = nonogram.numCols
+  for col in 0..<nonogram.numRows:
+    result.colUnknown[col] = nonogram.numRows
+
+  return result
+
 ## stopTime measures the elapsed time
 proc stopTimer*(workTable: var WorkTable) =
   workTable.endTime = cpuTime() - workTable.startTime
