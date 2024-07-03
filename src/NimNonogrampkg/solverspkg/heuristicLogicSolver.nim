@@ -6,7 +6,7 @@ Proc of the 2007 IEEE Symposium on Computational Intelligence and Games, 2007.
 ]#
 
 import math
-import solvers, contradictions
+import solvers
 import ../[utils, nonogram, workTable]
 
 type
@@ -36,9 +36,6 @@ proc preprocessingLine*(workTable: var WorkTable, lineIndex: int, asRow: bool) =
     hintNums: int = len(hint)
   for i in 0 ..< lineLength:
     states[i] = unknown
-
-  if detectHintOverflow(lineLength, hint):
-    raise newException(ValueError, "Invalid hints!")
   
   # When the all cells are white
   if hint == []:
