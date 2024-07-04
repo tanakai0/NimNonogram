@@ -5,6 +5,7 @@ References
 Proc of the 2007 IEEE Symposium on Computational Intelligence and Games, 2007.
 ]#
 
+import std/[algorithm, macros]
 import math
 import solvers
 import ../[utils, nonogram, workTable]
@@ -109,135 +110,118 @@ method solve*(solver: HeuristicPreprocessingSolver): bool =
 
 
 
-# https://nim-lang.org/docs/manual.html#iterators-and-the-for-statement-firstminusclass-iterators
+# Ref: https://nim-lang.org/docs/manual.html#iterators-and-the-for-statement-firstminusclass-iterators
+macro toIterator(x: ForLoopStmt): untyped =
+  let expr = x[0]
+  let call = x[1][1] # Get foo out of toItr(foo)
+  let body = x[2]
+  result = quote do:
+    block:
+      let itr = `call`
+      for `expr` in itr():
+          `body`
 
-# def gen_enumerate_all_coloring(line, d, black, white, blank):
-#     """
-#     generator that returns all coloring pattern of the line considering restriction of filled cells
+## enumerateAllColoring enumerates all coloring pattern in the line considering the hint using recursive
+## line : seq[CellState]
+## hint : seq[int]
+## pos : int
+##   Position of the line (used only for recursive) 
+## hintIndex : int
+##   Index of the hint (used only for recursive)
+## pastLine : seq[int]
+##   Temporary coloring (used only for recursive)
 
-#     Parameters
-#     ----------
-#     line : list of int
-#         1-dimensional list which express row or column
-#     d    : list of list of int
-#         description of the line
-#     black : int
-#         symbol of a cell that is colored black
-#     white : int
-#         symbol of a cell that is colored white
-#     blank : int
-#         symbol of a cell that is not decided yet
-    
-#     Yield
-#     -----
-#     filled_line : list of int
-#         filled pattern
-#     """
-#     # set initial value for other function
-#     ret = [blank for _ in range(len(line))]
-#     yield from _rec_gen_enumerate_all_coloring(line, d, black, white, blank, 0, 0, ret)
-    
-# def _rec_gen_enumerate_all_coloring(line, d, black, white, blank, pos, d_ind, ret):
-#     """
-#      generator that returns all coloring pattern of the line using recursive and restriction of filled cells
+proc enumerateAllColoring*(line: seq[CellState], hint: seq[int], pos: int = 0, hintIndex: int = 0, pastLine: seq[CellState] = @[]): iterator (): seq[CellState] =
+  result = iterator (): seq[CellState] =
 
-#     Parameters
-#     ----------
-#     line : list of int
-#         1-dimensional list which express row or column
-#     d    : list of list of int
-#         description of the line
-#     black : int
-#         symbol of a cell that is colored black
-#     white : int
-#         symbol of a cell that is colored white
-#     blank : int
-#         symbol of a cell that is not decided yet
-#     pos : int
-#         previous position of line (or ret) (used only for recursive) 
-#     d_ind : int
-#         previous position of description d (used only for recursive)
-#     ret : list of int
-#         temporary try of left most justification (used only for recursive)
+    ## Initialization
+    var
+      tempLine: seq[CellState] = @[]
+      lineLength: int = len(line)
+    if pastLine == @[]:
+      for _ in 0 ..< lineLength:
+        tempLine.add(CellState.unknown)
+    else:
+      tempLine = pastLine
+    # echo "pos = ", pos, " hintIndex = ", hintIndex, " tempLine = ", tempLine
     
-#     Yield
-#     -----
-#     filled_line : list of int
-#         filled pattern
+    # When all elements of the hint was adopted.
+    if hintIndex == len(hint):
+      # If the solution is valid, then yield it.
+      if (not templine.contains(unknown)) and (utils.line2hint(tempLine) == hint):
+        yield tempLine
         
-#     Notes
-#     -----
-#     abstract of steps
-#     step1 : check if the solution is right and yield ret when it is a consistent pattern
-#     step2 : decide the element of the description and try the all positions of the elements 
-#     """
-#     # print("pos:{} d_ind:{}\n ret:{}\n--------------------------".format(pos, d_ind, ret))
-    
-#     # set initial values for this function
-#     if ret == None:
-#         ret = [[blank for _ in range(len(line))]]
-        
-#     # when all elements of the description was adopted
-#     if d_ind == len(d):
-#         if blank not in ret and nonogram.Puzzle.line2description(ret, black, white, blank, focus = black) == d:
-#             yield deepcopy(ret)
-            
-#     # when some elements of the description wasn't adopted
-#     else:
-#         copy_ret = deepcopy(ret)
-#         # name value which occurs frequently black_range
-#         black_range = pos + d[d_ind]
-        
-#         # if d_ind is last index
-#         if d_ind == len(d) - 1:
-#             # obvious inconsistent check without coloring any 
-#             if black_range <= len(line):
-#                 if line[pos] == black:
-#                     # obvious inconsistent check without coloring any cell
-#                     if (white not in line[pos + 1: black_range]) and (black not in line[black_range:]):
-#                         for i in range(pos, black_range):
-#                             ret[i] = black
-#                         for i in range(black_range, len(line)):
-#                             ret[i] = white
-#                         yield from _rec_gen_enumerate_all_coloring(line, d, black, white, blank, pos = len(line), d_ind = d_ind + 1, ret = ret)
-#                 elif line[pos] == white:
-#                     ret[pos] = white
-#                     yield from _rec_gen_enumerate_all_coloring(line, d, black, white, blank, pos +1 , d_ind = d_ind, ret = ret)
-#                 else:
-#                     # color black for now
-#                     if (white not in line[pos + 1: black_range]) and (black not in line[black_range:]):
-#                         for i in range(pos, black_range):
-#                             ret[i] = black
-#                         for i in range(black_range, len(line)):
-#                             ret[i] = white
-#                         yield from _rec_gen_enumerate_all_coloring(line, d, black, white, blank, pos = len(line), d_ind = d_ind + 1, ret = ret)
-#                     # if black is inconsistent, then color white now with modifying coloring
-#                     for i in range(len(ret)):
-#                         ret[i] = copy_ret[i]
-#                     ret[pos] = white
-#                     yield from _rec_gen_enumerate_all_coloring(line, d, black, white, blank, pos + 1, d_ind = d_ind, ret = ret)
-#         # if d_ind isn't last index          
-#         else:
-#             # obvious inconsistent check without coloring any cell
-#             if pos + sum(d[d_ind:]) + len(d) - d_ind - 1 <= len(line):
-#                 if line[pos] == black:
-#                     # obvious inconsistent check without coloring any cell
-#                     if (white not in line[pos + 1: black_range]) and (black != line[black_range]):
-#                         for i in range(pos, black_range):
-#                             ret[i] = black
-#                         ret[black_range] = white
-#                         yield from _rec_gen_enumerate_all_coloring(line, d, black, white, blank, pos = black_range + 1, d_ind = d_ind + 1, ret = ret)
-#                 elif line[pos] == white:
-#                     ret[pos] = white
-#                     yield from _rec_gen_enumerate_all_coloring(line, d, black, white, blank, pos = pos + 1, d_ind = d_ind, ret = ret)
-#                 else:
-#                     # color black for now
-#                     if (white not in line[pos + 1: black_range]) and (black != line[black_range]):
-#                         for i in range(pos, black_range):
-#                             ret[i] = black
-#                         ret[black_range] = white
-#                         yield from _rec_gen_enumerate_all_coloring(line, d, black, white, blank, pos = black_range + 1, d_ind = d_ind + 1, ret = ret)
+    # When some elements of the description wasn't adopted.
+    else:
+      var
+        copiedTempLine: seq[CellState] = tempLine
+        blackRange: int = pos + hint[hintIndex]
+      
+      # If hintIndex is the last index of the hint.
+      if hintIndex == len(hint) - 1:
+        # Obvious inconsistent check without coloring any cell
+        if blackRange <= lineLength:
+          if line[pos] == black:
+            # Obvious inconsistent check without coloring any cell
+            if (not line[pos + 1 ..< blackRange].contains(white)) and (not line[blackRange .. ^1].contains(black)):
+              for i in pos ..< blackRange:
+                tempLine[i] = black
+              for i in blackRange ..< lineLength:
+                tempLine[i] = white
+              for e in toIterator(enumerateAllColoring(line, hint, lineLength, hintIndex + 1, tempLine)):
+                yield e
+          elif line[pos] == white:
+            tempLine[pos] = white
+            for e in toIterator(enumerateAllColoring(line, hint, pos + 1, hintIndex, tempLine)):
+              yield e
+          elif line[pos] == unknown:
+            # try to color the cell in black color.
+            if (not line[pos + 1 ..< blackRange].contains(white)) and (not line[blackRange .. ^1].contains(black)):
+              for i in pos ..< blackRange:
+                tempLine[i] = black
+              for i in blackRange ..< lineLength:
+                tempLine[i] = white
+              for e in toIterator(enumerateAllColoring(line, hint, lineLength, hintIndex + 1, tempLine)):
+                yield e
+            # If the black color is inconsistent, then color the cell in white color
+            tempLine = copiedTempLine
+            tempLine[pos] = white
+            for e in toIterator(enumerateAllColoring(line, hint, pos + 1, hintIndex, tempLine)):
+              yield e
+      else:  # If hintIndex is not the last index of the hint.
+        # Obvious inconsistent check without coloring any cell
+        if pos + sum(hint[hintIndex .. ^1]) + len(hint) - hintIndex - 1 <= lineLength:
+          if line[pos] == black:
+            # Obvious inconsistent check without coloring any cell
+            if (not line[pos + 1 ..< blackRange].contains(white)) and (line[blackRange] != black):
+              for i in pos ..< blackRange:
+                tempLine[i] = black
+              tempLine[blackRange] = white
+              for e in toIterator(enumerateAllColoring(line, hint, blackRange + 1, hintIndex + 1, tempLine)):
+                yield e
+          elif line[pos] == white:
+            tempLine[pos] = white
+            for e in toIterator(enumerateAllColoring(line, hint, pos + 1, hintIndex, tempLine)):
+                yield e
+          elif line[pos] == unknown:
+            # try to color the cell in black color.
+            if (not line[pos + 1 ..< blackRange].contains(white)) and (line[blackRange] != black):
+              for i in pos ..< blackRange:
+                tempLine[i] = black
+              tempLine[blackRange] = white
+              for e in toIterator(enumerateAllColoring(line, hint, blackRange + 1, hintIndex + 1, tempLine)):
+                yield e
+            # If the black color is inconsistent, then color the cell in white color
+            tempLine = copiedTempLine
+            tempLine[pos] = white
+            for e in toIterator(enumerateAllColoring(line, hint, pos + 1, hintIndex, tempLine)):
+              yield e
+      tempLine = copiedTempLine
 
+
+iterator enumerateAllColoring*(line: seq[CellState], hint: seq[int]): seq[CellState] {.closure.} = 
+  for x in toIterator(enumerateAllColoring(line, hint)):
+    yield x
 
 ## left_most_justification returns the left-most justigication for one line
 ## Example
@@ -247,20 +231,35 @@ method solve*(solver: HeuristicPreprocessingSolver): bool =
 ## 011020222022122221201  original
 ## 011000110001100111001  left most justification
 ## 
-proc left_most_justification*(line: seq[CellState], hint: seq[int]): seq[CellState] = 
-  var
-    lineLength: int = len(line)
+proc leftMostJustification*(line: seq[CellState], hint: seq[int]): seq[CellState] = 
   if hint == []:
-    for _ in 0 ..< lineLength:
+    for _ in 0 ..< len(line):
       result.add(white)
       return result
-#     g = gen_enumerate_all_coloring(line, d, black, white, blank)
-#     # first element of g is the left-most justification
-#     left_most = None
-#     try:
-#         left_most = g.__next__()
-#     except StopIteration:  # if there isn't left-most justification
-#         left_most = -1
-#     g.close()
-#     return left_most
+  else:
+    let allColoring = enumerateAllColoring(line, hint)
+    # The first element of allColoring is the left-most justification.
+    # If there is not the left-most justification, the return the empty list (that equals with the initialized output type of the iterator).
+    return allColoring()
 
+proc rightMostJustification*(line: seq[CellState], hint: seq[int]): seq[CellState] = 
+  if hint == []:
+    for _ in 0 ..< len(line):
+      result.add(white)
+      return result
+  else:
+    let allColoring = enumerateAllColoring(reversed(line), reversed(hint))
+    # The first element of allColoring is the right-most justification.
+    # If there is not the right-most justification, the return the empty list (that equals with the initialized output type of the iterator).
+    return reversed(allColoring())
+
+
+when isMainModule:
+  echo "Use case 1"
+  let allColoring = enumerateAllColoring(@[black, unknown, unknown, black, unknown, unknown, unknown], @[1, 2, 1])
+  for x in allColoring():
+    echo x
+
+  echo "Use case 2"
+  for x in enumerateAllColoring(@[black, unknown, unknown, black, unknown, unknown, unknown], @[1, 2, 1]):
+    echo x

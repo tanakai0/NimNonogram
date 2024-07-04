@@ -54,3 +54,42 @@ suite "heuristicLogicSolver Tests":
           @[unknown, unknown, unknown, unknown, unknown, unknown, unknown, unknown]]
     discard solver.solve()
     check (solver.workTable.nonogram.grid == preprocessedGrid)
+
+  test "correct enumerateAllColoring":
+    let
+      correctAnswer1: seq[seq[CellState]] = @[@[black, white, black, black, white], 
+                                              @[black, white, white, black, black]]
+      correctAnswer2: seq[seq[CellState]] = @[@[black, white, black, black, white, black, white], 
+                                              @[black, white, black, black, white, white, black],
+                                              @[black, white, white, black, black, white, black]]
+      correctAnswer3: seq[seq[CellState]] = @[]
+    var
+      answer1: seq[seq[CellState]]
+      answer2: seq[seq[CellState]]
+      answer3: seq[seq[CellState]]
+    
+    for x in enumerateAllColoring(@[black, unknown, unknown, black, unknown], @[1, 2]):
+      answer1.add(x)
+    check(answer1 == correctAnswer1)
+    
+    for x in enumerateAllColoring(@[black, unknown, unknown, black, unknown, unknown, unknown], @[1, 2, 1]):
+      answer2.add(x)
+    check(answer2 == correctAnswer2)
+
+    # Contradictional case
+    for x in enumerateAllColoring(@[black, unknown, black], @[1, 2]):
+      answer2.add(x)
+    check(answer3 == correctAnswer3)
+
+  test "correct leftMostJustification and rightMostJustification":
+    let
+      correctAnswer1: seq[CellState] = @[black, white, black, black, white, black, white]
+      correctAnswer2: seq[CellState] = @[black, white, white, black, black, white, black]
+      correctAnswer3: seq[CellState] = @[]
+    
+    check(leftMostJustification(@[black, unknown, unknown, black, unknown, unknown, unknown], @[1, 2, 1]) == correctAnswer1)
+    check(rightMostJustification(@[black, unknown, unknown, black, unknown, unknown, unknown], @[1, 2, 1]) == correctAnswer2)
+    
+    # Contradictional case
+    check(leftMostJustification(@[black, unknown, black], @[1, 2]) == correctAnswer3)
+    check(rightMostJustification(@[black, unknown, black], @[1, 2]) == correctAnswer3)
