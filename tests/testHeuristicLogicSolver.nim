@@ -1,5 +1,5 @@
 import std/unittest
-import NimNonogrampkg/[constants, nonogram, workTable]
+import NimNonogrampkg/[constants, nonogram, workTable, utils]
 import NimNonogrampkg/solverspkg/heuristicLogicSolver
 
 suite "heuristicLogicSolver Tests":
@@ -63,6 +63,8 @@ suite "heuristicLogicSolver Tests":
                                               @[black, white, black, black, white, white, black],
                                               @[black, white, white, black, black, white, black]]
       correctAnswer3: seq[seq[CellState]] = @[]
+      line: seq[CellState] = @[unknown, unknown, unknown, unknown, unknown, unknown, unknown]
+      hint: seq[int] = @[1, 1, 1]
     var
       answer1: seq[seq[CellState]]
       answer2: seq[seq[CellState]]
@@ -80,6 +82,12 @@ suite "heuristicLogicSolver Tests":
     for x in enumerateAllColoring(@[black, unknown, black], @[1, 2]):
       answer2.add(x)
     check(answer3 == correctAnswer3)
+    
+    # Check only the number of patterns
+    var count: int = 0
+    for x in enumerateAllColoring(line, hint):
+      inc(count)
+    check(degreeOfFreedom(len(line), hint) == count)
 
   test "correct leftMostJustification and rightMostJustification":
     let
