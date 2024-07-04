@@ -261,5 +261,5 @@ when isMainModule:
     echo x
 
   echo "Use case 2"
-  for x in enumerateAllColoring(@[black, unknown, unknown, black, unknown, unknown, unknown], @[1, 2, 1]):
+  for x in enumerateAllColoring(@[unknown, unknown, unknown, unknown, unknown, unknown, unknown], @[1, 1, 1]):
     echo x
