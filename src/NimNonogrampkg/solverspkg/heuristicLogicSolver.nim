@@ -253,6 +253,24 @@ proc rightMostJustification*(line: seq[CellState], hint: seq[int]): seq[CellStat
     # If there is not the right-most justification, the return the empty list (that equals with the initialized output type of the iterator).
     return reversed(allColoring())
 
+## enumerateAndFillConsensusColors enumerates all coloring patterns for the line and colors cells which have the same color among all patterns.
+proc enumerateAndFillConsensusColors*(line: seq[CellState], hint: seq[int]): seq[CellState] = 
+  var
+    lineLength: int = len(line)
+  for i in 0 ..< lineLength:
+    result.add(unknown)
+  var contradictions: seq[bool] = newSeq[bool](lineLength)
+  for pattern in enumerateAllColoring(line, hint):
+    for i in 0 ..< lineLength:
+      if not contradictions[i]:
+        if (result[i] == unknown):
+          result[i] = pattern[i]
+        elif (result[i] != unknown) and (result[i] != pattern[i]):
+          contradictions[i] = true
+          result[i] = unknown
+  return result
+
+
 
 when isMainModule:
   echo "Use case 1"
@@ -263,3 +281,9 @@ when isMainModule:
   echo "Use case 2"
   for x in enumerateAllColoring(@[unknown, unknown, unknown, unknown, unknown, unknown, unknown], @[1, 1, 1]):
     echo x
+
+  echo "Use case 3"
+  let allColoring2 = enumerateAllColoring(@[unknown, unknown, unknown, black, unknown, black, unknown, unknown, unknown, unknown], @[3, 3])
+  for x in allColoring2():
+    echo x
+  echo enumerateAndFillConsensusColors(@[unknown, unknown, unknown, black, unknown, black, unknown, unknown, unknown, unknown], @[3, 3])

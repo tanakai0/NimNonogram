@@ -101,3 +101,9 @@ suite "heuristicLogicSolver Tests":
     # Contradictional case
     check(leftMostJustification(@[black, unknown, black], @[1, 2]) == correctAnswer3)
     check(rightMostJustification(@[black, unknown, black], @[1, 2]) == correctAnswer3)
+
+  test "correct enumerateAndFillConsensusColors":
+    let
+      correctAnswer1: seq[CellState] = @[white, unknown, unknown, black, unknown, black, unknown, black, unknown, unknown]
+
+    check(enumerateAndFillConsensusColors(@[unknown, unknown, unknown, black, unknown, black, unknown, unknown, unknown, unknown], @[3, 3]) == correctAnswer1)
