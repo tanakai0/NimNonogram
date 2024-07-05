@@ -302,23 +302,127 @@ proc nameSections*(line: seq[CellState]): seq[int] =
   
   return result
 
-## sectionMatch colors the cells that have the same section number between left most justification and right most justificatoin
-proc sectionMatch*(line: seq[CellState], hint: seq[int], leftSection: seq[int], rightSection: seq[int]): seq[CellState] = 
-  quit()
+## sectionMatch colors the cells that have the same section number between left-most justification and right-most justificatoin
+## Example
+## 0: white, 1: black, x : unknown
+## lineLength = 21 (index 0-20), hint = [2, 2, 2, 3, 1]
+## 0 1 1 0 x 0 x x x 0 x x 1 x x x x 1 x 0 1  original
+## 0 1 1 2 2 2 3 3 4 4 4 5 5 6 6 7 7 7 8 8 9  section numbers of the left-most justification
+## 0 1 1 2 2 2 2 3 3 4 4 4 5 5 6 6 7 7 7 8 9  section numbers of the right-most justification
+## 0 1 1 0 0 0 x 1 x 0 0 x 1 x 0 x 1 1 x 0 1  result
+##         ^     ^     ^       ^   ^          cells filled by this method
+proc sectionMatch*(line: seq[CellState], hint: seq[int], leftSections: seq[int], rightSections: seq[int]): seq[CellState] = 
+  for i in 0 ..< len(line):
+    if leftSections[i] == rightSections[i]:
+      if leftSections[i] mod 2 == 0:
+        result.add(white)
+      else:
+        result.add(black)
+    else:
+      result.add(line[i])
+  return result
 
 ## sectionNearBoundaries colors cells in black near (black, white) or (white, black) boundaries
-proc sectionNearBoundaries*(line: seq[CellState], hint: seq[int], leftSection: seq[int], rightSection: seq[int]): seq[CellState] = 
-  quit()
+## Example
+## 0: white, 1: black, x : unknown
+## lineLength = 26 (index 0-25), hint = [2, 3, 2, 3, 1, 1] = [h0, h1, h2, h3, h4, h5]
+## 0 1 1 0 x x x x x x x 0 1 x x x x 1  x  x  x  x  0  x  0  1  original
+## 0 1 1 2 3 3 3 4 5 5 6 6 7 7 7 8 8 9 10 10 10 10 10 10 10 11  section numbers of the left-most justification
+## 0 1 1 2 2 2 2 2 2 2 2 2 3 3 3 4 5 5  6  7  7  7  8  9 10 11  section numbers of the right-most justification
+## 0 1 1 0 x x x x x x x 0 1 1 x x x 1  x  x  x  x  0  x  0  1  result
+##                       ^ ^  This is a (0, 1) boundary
+## (the number of colored cells) = min(h1(= section #3), h2(= section #5), h3(= section #7)) = min(3, 2, 3) = 2
+proc sectionNearBoundaries*(line: seq[CellState], hint: seq[int], leftSections: seq[int], rightSections: seq[int]): seq[CellState] = 
+  let
+    lineLength: int = len(line)
+  var
+    # bwBoundaries contains black positions in the boundary (black, white).
+    # For example, 0 1 x 1 0 x x 0 1 x 0 x x x 1 0 1 -> [3, 14]
+    # wbBoondaries contains black positions in the boundary (white, black).
+    # For example, 0 1 x 1 0 x x 0 1 x 0 x x x 1 0 1 -> [1, 8, 16]
+    bwBoundaries: seq[int]
+    wbBoundaries: seq[int]
+  result = line
+  for i in 0 ..< lineLength - 1:
+    if (line[i] == black) and (line[i+1] == white):
+      bwBoundaries.add(i)
+  for i in 1 ..< lineLength:
+    if (line[i-1] == white) and (line[i] == black):
+      wbBoundaries.add(i)
+  
+  for b in bwBoundaries:
+    for i in 1 ..< min(hint[(rightSections[b] div 2) ..< (leftSections[b] div 2) + 1]):
+      result[b-i] = black
+  for b in wbBoundaries:
+    for i in 1 ..< min(hint[(rightSections[b] div 2) ..< (leftSections[b] div 2) + 1]):
+      result[b+i] = black
+  
+  return result
 
-## sectionConsecutiveBlanks colors some consecutive unknown cells in white.
-proc sectionConsecutiveBlanks*(line: seq[CellState], hint: seq[int], leftSection: seq[int], rightSection: seq[int]): seq[CellState] = 
-  quit()
+
+## sectionConsecutiveUnknowns colors some consecutive unknown cells in white.
+## 0: white, 1: black, x : unknown
+## lineLength = 29 (index 0-28), hint = [2, 1, 2, 2, 2, 2, 1] = [h0, h1, h2, h3, h4, h5]
+## 1 1 0 x 0 x x x x x x x 1  0  x  0  x  0  x  x  x  x  x  x  x  x  0  1  0  original
+## 1 1 2 3 4 5 5 6 7 7 8 9 9 10 10 10 10 10 11 11 12 12 12 12 12 12 12 13 14  section numbers of the left-most justification
+## 1 1 2 2 2 2 2 2 2 3 4 5 5  6  6  6  6  6  7  7  8  9  9 10 11 11 12 13 14  section numbers of the right-most justification
+## 1 1 0 x 0 x x x x x x x 1  0  0  0  0  0  x  x  x  x  x  x  x  x  0  1  0  result
+##                               ^     ^   Two cells are colored in white
+proc sectionConsecutiveUnknowns*(line: seq[CellState], hint: seq[int], leftSections: seq[int], rightSections: seq[int]): seq[CellState] = 
+  # wuw is the list of information about consecutive unknowns with white at both sides of the part
+  # The element of wuw is (index of the left white cell, index of the right white cell, length of the consecutive unknowns)
+  # For the above example, wuw = [(2, 4, 1), (13, 15, 1), (15, 17, 1), (17, 26, 8)]
+  type UnknownsBetweenWhites = tuple
+    leftWhiteIndex: int
+    rightWhiteIndex: int
+    unknownLength: int
+  var
+    wuw: seq[UnknownsBetweenWhites]
+    whiteIndexes: seq[int]
+    leftWhiteIndex: int
+    rightWhiteIndex: int
+    length: int
+  
+  for i in 0 ..< len(line):
+    if line[i] == white:
+      whiteIndexes.add(i)
+  for i in 0 ..< len(whiteIndexes) - 1:
+    leftWhiteIndex = whiteIndexes[i]
+    rightWhiteIndex = whiteIndexes[i+1]
+    length = rightWhiteIndex - leftWhiteIndex - 1
+    if (not line[leftWhiteIndex + 1 ..< rightWhiteIndex].contains(black)) and (length >= 1):
+      wuw.add((leftWhiteIndex: leftWhiteIndex, rightWhiteIndex: rightWhiteIndex, unknownLength: length))
+    
+     
+    # for b in wbw:
+    #     # d_l : index of description that exist left outer of the blanks and nearest neighbor of the blanks when line is the right most justification
+    #     # d_r : index of description that exist right outer of the blanks and nearest neighbor of the blanks when line is the left most justification
+    #     # e.g. 
+    #     # 1  1  0  x  0  x  x  x  x  x  x  x  1  0  x! 0  x! 0  x  x  x  x  x  x  x  x  0  1  0  original
+    #     # B1 B1 W1 B2 W2 B3 B3 W3 B4 B4 W4 B5 B5 W5 W5 W5 W5 W5 B6 B6 W7 W7 W7 W7 W7 W7 W7 B7 0  left most justification (with named section)
+    #     # B1 B1 W1 W1 W1 W1 W1 W1 W1 B2 W2 B3 B3 W4 W4 W4 W4 W4 B4 B4 W5 B5 B5 W6 B6 B6 W7 B7 0  right most justification (with named section)
+    #     # Be careful, Bk have d[k-1] length
+    #     # wbw = [(2, 4, 1), (13, 15, 1), (15, 17, 1), (17, 26, 8)]
+    #     # For wbw[0]=(2,4,1), d_l = 0 (B_1), d_r = 2 (B_3)
+    #     # For wbw[1]=(12,15,1), d_l = 2 (B_3), d_r = 5 (B_6)
+    #     # For wbw[2]=(15,17,1), d_l = 2 (B_3), d_r = 5 (B_6)
+    #     # For wbw[3]=(17,26,8), d_l = 2 (B_3), d_r = 6 (B_7)
+    #     # ( If original[27] == x, wbw contains (26,28,1). d_l = 6 (B_7), d_r = 7 (B_8, but doesn't exist <- be careful! ) )
+    #     # If length of blanks < min(d_l+1, d_l+2, ..., d_r-2, d_r-1) then blanks must be white
+    #     d_l = (right_most_sections[b[0]] - 1)//2
+    #     d_r = ( left_most_sections[b[1]] + 1)//2
+    #     if d_r - d_l >= 2:
+    #         if b[2] < min(d[d_l+1:d_r]):
+    #             for i in range(b[0] + 1, b[1]):
+    #                 new_line[i] = white
+
+
 
 ## sectionMethods use the three sub procedures that use the left-most justification and right-most justification
 ## The three sub procedures are;
 ## 1: sectionMatch,
 ## 2: sectionNearBoundaries, and
-## 3: sectionConsecutiveBlanks.
+## 3: sectionConsecutiveUnknowns.
 proc sectionMethods*(line: seq[CellState], hint: seq[int]): seq[CellState] = 
   let
     lmj: seq[CellState] = leftMostJustification(line, hint)
@@ -332,7 +436,7 @@ proc sectionMethods*(line: seq[CellState], hint: seq[int]): seq[CellState] =
 
   result = sectionMatch(line, hint, lsec, rsec)
   result = sectionNearBoundaries(result, hint, lsec, rsec)
-  result = sectionConsecutiveBlanks(result, hint, lsec, rsec)
+  result = sectionConsecutiveUnknowns(result, hint, lsec, rsec)
 
   return result
   
@@ -356,3 +460,5 @@ when isMainModule:
   echo "Use case 4"
   echo nameSections(@[white, white, black, white, black, white, white])
   echo nameSections(@[black, black, white, white, black, black, black])
+
+

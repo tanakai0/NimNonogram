@@ -111,3 +111,22 @@ suite "heuristicLogicSolver Tests":
   test "correct nameSections":
     check(nameSections(@[white, white, black, white, black, white, white]) == @[0, 0, 1, 2, 3, 4, 4])
     check(nameSections(@[black, black, white, white, black, black, black]) == @[1, 1, 2, 2, 3, 3, 3])
+
+  test "correct sectionMethods (sectionMatch, sectionNearBoundaries, and sectionConsecutiveUnknowns)":
+    let
+      line1: seq[CellState] = @[white, black, black, white, unknown, white, unknown, unknown, unknown, white,
+                                unknown, unknown, black, unknown, unknown, unknown, unknown, black, unknown, white, black]
+      hint1: seq[int] = @[2, 2, 2, 3, 1]
+      lsec1: seq[int] = nameSections(leftMostJustification(line1, hint1))
+      rsec1: seq[int] = nameSections(rightMostJustification(line1, hint1))
+      correctAnswer1: seq[CellState] = @[white, black, black, white, white, white, unknown, black, unknown, white, 
+                                         white, unknown, black, unknown, white, unknown, black, black, unknown, white, black]
+      line2: seq[CellState] = @[white, black, black, white, unknown, unknown, unknown, unknown, unknown, unknown, unknown, white, black,
+                              unknown, unknown, unknown, unknown, black, unknown, unknown, unknown, unknown, white, unknown, white, black]
+      hint2: seq[int] = @[2, 3, 2, 3, 1, 1]
+      lsec2: seq[int] = nameSections(leftMostJustification(line2, hint2))
+      rsec2: seq[int] = nameSections(rightMostJustification(line2, hint2))
+      correctAnswer2: seq[CellState] = @[white, black, black, white, unknown, unknown, unknown, unknown, unknown, unknown, unknown, white, black, 
+                                         black, unknown, unknown, unknown, black, unknown, unknown, unknown, unknown, white, unknown, white, black]
+    check(sectionMatch(line1, hint1, lsec1, rsec1) == correctAnswer1)
+    check(sectionNearBoundaries(line2, hint2, lsec2, rsec2) == correctAnswer2)
