@@ -107,3 +107,7 @@ suite "heuristicLogicSolver Tests":
       correctAnswer1: seq[CellState] = @[white, unknown, unknown, black, unknown, black, unknown, black, unknown, unknown]
 
     check(enumerateAndFillConsensusColors(@[unknown, unknown, unknown, black, unknown, black, unknown, unknown, unknown, unknown], @[3, 3]) == correctAnswer1)
+
+  test "correct nameSections":
+    check(nameSections(@[white, white, black, white, black, white, white]) == @[0, 0, 1, 2, 3, 4, 4])
+    check(nameSections(@[black, black, white, white, black, black, black]) == @[1, 1, 2, 2, 3, 3, 3])

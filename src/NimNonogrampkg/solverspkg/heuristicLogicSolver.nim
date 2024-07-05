@@ -271,6 +271,55 @@ proc enumerateAndFillConsensusColors*(line: seq[CellState], hint: seq[int]): seq
   return result
 
 
+## nameSections assigns each cell a number corresponding to its section.
+## Sections are consecutive cells which have the same color.
+## The first white section is named 0. The second white section is named 2. The third white sectuib is named 4, ... .
+## The first black section is named 1. The second black section is named 3. The third black section is named 5, ... .
+## Note that the section #0 does not exist when the most left cell is colored in black.
+## For example,
+## 0010100 -> 0012344
+## 1100111 -> 1122333 (0 is disappeared).
+proc nameSections*(line: seq[CellState]): seq[int] = 
+  var
+    number: int
+    color: CellState
+
+  # If the line is empty, then return the empty list.
+  if line == @[]:
+    return result
+  
+  if line[0] == white:
+    number = 0
+  else:
+    number = 1
+  color = line[0]
+
+  for c in line:
+    if c != color:
+      color = c
+      inc(number)
+    result.add(number)
+  
+  return result
+
+## sectionMethods use the three sub procedures that use the left-most justification and right-most justification
+## The three sub procedures are;
+## 1: sectionMatch,
+## 2: sectionBlackingNearBoundary, and
+## 3: sectionWhiteningBlanks.
+proc sectionMethods*(line: seq[CellState], hint: seq[int]): seq[CellState] = 
+  let
+    lmj: seq[CellState] = leftMostJustification(line, hint)
+    rmj: seq[CellState] = rightMostJustification(line, hint)
+    lsec: seq[int] = nameSections(lmj)
+    rsec: seq[int] = nameSections(rmj)
+  
+  # If there are not any justification patterns, then return the empty list.
+  if (lmj == @[]) or (rmj == @[]):
+    return result
+
+
+  
 
 when isMainModule:
   echo "Use case 1"
@@ -287,3 +336,7 @@ when isMainModule:
   for x in allColoring2():
     echo x
   echo enumerateAndFillConsensusColors(@[unknown, unknown, unknown, black, unknown, black, unknown, unknown, unknown, unknown], @[3, 3])
+
+  echo "Use case 4"
+  echo nameSections(@[white, white, black, white, black, white, white])
+  echo nameSections(@[black, black, white, white, black, black, black])
