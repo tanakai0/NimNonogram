@@ -302,11 +302,23 @@ proc nameSections*(line: seq[CellState]): seq[int] =
   
   return result
 
+## sectionMatch colors the cells that have the same section number between left most justification and right most justificatoin
+proc sectionMatch*(line: seq[CellState], hint: seq[int], leftSection: seq[int], rightSection: seq[int]): seq[CellState] = 
+  quit()
+
+## sectionNearBoundaries colors cells in black near (black, white) or (white, black) boundaries
+proc sectionNearBoundaries*(line: seq[CellState], hint: seq[int], leftSection: seq[int], rightSection: seq[int]): seq[CellState] = 
+  quit()
+
+## sectionConsecutiveBlanks colors some consecutive unknown cells in white.
+proc sectionConsecutiveBlanks*(line: seq[CellState], hint: seq[int], leftSection: seq[int], rightSection: seq[int]): seq[CellState] = 
+  quit()
+
 ## sectionMethods use the three sub procedures that use the left-most justification and right-most justification
 ## The three sub procedures are;
 ## 1: sectionMatch,
-## 2: sectionBlackingNearBoundary, and
-## 3: sectionWhiteningBlanks.
+## 2: sectionNearBoundaries, and
+## 3: sectionConsecutiveBlanks.
 proc sectionMethods*(line: seq[CellState], hint: seq[int]): seq[CellState] = 
   let
     lmj: seq[CellState] = leftMostJustification(line, hint)
@@ -318,7 +330,11 @@ proc sectionMethods*(line: seq[CellState], hint: seq[int]): seq[CellState] =
   if (lmj == @[]) or (rmj == @[]):
     return result
 
+  result = sectionMatch(line, hint, lsec, rsec)
+  result = sectionNearBoundaries(result, hint, lsec, rsec)
+  result = sectionConsecutiveBlanks(result, hint, lsec, rsec)
 
+  return result
   
 
 when isMainModule:
