@@ -382,7 +382,9 @@ proc sectionConsecutiveUnknowns*(line: seq[CellState], hint: seq[int], leftSecti
     leftWhiteIndex: int
     rightWhiteIndex: int
     length: int
-  
+    hl: int
+    hr: int
+  result = line
   for i in 0 ..< len(line):
     if line[i] == white:
       whiteIndexes.add(i)
@@ -392,30 +394,33 @@ proc sectionConsecutiveUnknowns*(line: seq[CellState], hint: seq[int], leftSecti
     length = rightWhiteIndex - leftWhiteIndex - 1
     if (not line[leftWhiteIndex + 1 ..< rightWhiteIndex].contains(black)) and (length >= 1):
       wuw.add((leftWhiteIndex: leftWhiteIndex, rightWhiteIndex: rightWhiteIndex, unknownLength: length))
-    
-     
-    # for b in wbw:
-    #     # d_l : index of description that exist left outer of the blanks and nearest neighbor of the blanks when line is the right most justification
-    #     # d_r : index of description that exist right outer of the blanks and nearest neighbor of the blanks when line is the left most justification
-    #     # e.g. 
-    #     # 1  1  0  x  0  x  x  x  x  x  x  x  1  0  x! 0  x! 0  x  x  x  x  x  x  x  x  0  1  0  original
-    #     # B1 B1 W1 B2 W2 B3 B3 W3 B4 B4 W4 B5 B5 W5 W5 W5 W5 W5 B6 B6 W7 W7 W7 W7 W7 W7 W7 B7 0  left most justification (with named section)
-    #     # B1 B1 W1 W1 W1 W1 W1 W1 W1 B2 W2 B3 B3 W4 W4 W4 W4 W4 B4 B4 W5 B5 B5 W6 B6 B6 W7 B7 0  right most justification (with named section)
-    #     # Be careful, Bk have d[k-1] length
-    #     # wbw = [(2, 4, 1), (13, 15, 1), (15, 17, 1), (17, 26, 8)]
-    #     # For wbw[0]=(2,4,1), d_l = 0 (B_1), d_r = 2 (B_3)
-    #     # For wbw[1]=(12,15,1), d_l = 2 (B_3), d_r = 5 (B_6)
-    #     # For wbw[2]=(15,17,1), d_l = 2 (B_3), d_r = 5 (B_6)
-    #     # For wbw[3]=(17,26,8), d_l = 2 (B_3), d_r = 6 (B_7)
-    #     # ( If original[27] == x, wbw contains (26,28,1). d_l = 6 (B_7), d_r = 7 (B_8, but doesn't exist <- be careful! ) )
-    #     # If length of blanks < min(d_l+1, d_l+2, ..., d_r-2, d_r-1) then blanks must be white
-    #     d_l = (right_most_sections[b[0]] - 1)//2
-    #     d_r = ( left_most_sections[b[1]] + 1)//2
-    #     if d_r - d_l >= 2:
-    #         if b[2] < min(d[d_l+1:d_r]):
-    #             for i in range(b[0] + 1, b[1]):
-    #                 new_line[i] = white
-
+  for u in wuw:
+    # hl : the index of the hint located immediately left of the consecutive unknown cells, nearest to those unknowns when applying right-most justification.
+    # hr : the index of the hint located immediately right of the consecutive unknown cells, nearest to those unknowns when applying left-most justification.
+    # Note that the k-th hint hk corresponds with the section #(2k+1).
+    # Example
+    # 1 1 0 x 0 x x x x x x x 1  0  x  0  x  0  x  x  x  x  x  x  x  x  0  1  0  original
+    #       ^                       ^     ^     ^  ^  ^  ^  ^  ^  ^  ^
+    #     wuw[0]                  wuw[1] wuw[2]          wuw[3]
+    # 1 1 2 3 4 5 5 6 7 7 8 9 9 10 10 10 10 10 11 11 12 12 12 12 12 12 12 13 14  section numbers of the left-most justification
+    #           ^ ^                             ^  ^                       ^
+    #           hr=2                            hr=5                     hr=6
+    # 1 1 2 2 2 2 2 2 2 3 4 5 5  6  6  6  6  6  7  7  8  9  9 10 11 11 12 13 14  section numbers of the right-most justification
+    # ^ ^                   ^ ^                                   
+    # hl=0                  hl=2
+    # wuw[0]=( 2, 4,1), hl = 0 (#1), hr = 2 (#5)
+    # wuw[1]=(13,15,1), hl = 2 (#5), hr = 5 (#11)
+    # wuw[2]=(15,17,1), hl = 2 (#5), hr = 5 (#11)
+    # wuw[3]=(17,26,8), hl = 2 (#5), hr = 6 (#13)
+    # If original[27] == x, wuw contains (26,28,1). hl = 6 (#13), hr = 7 (#15), but this does not exist!
+    # If the length of consecutive unknowns < min(hl+1, hl+2, ..., hr-2, hr-1), then the unkowns can be colored in white
+    hl = (rightSections[u.leftWhiteIndex] - 1) div 2
+    hr = (leftSections[u.rightWhiteIndex] + 1) div 2
+    if (hr - hl) >= 2:
+      if u.unknownLength < min(hint[hl+1 ..< hr]):
+        for i in u.leftWhiteIndex + 1 ..< u.rightWhiteIndex:
+          result[i] = white
+  return result
 
 
 ## sectionMethods use the three sub procedures that use the left-most justification and right-most justification
@@ -461,4 +466,4 @@ when isMainModule:
   echo nameSections(@[white, white, black, white, black, white, white])
   echo nameSections(@[black, black, white, white, black, black, black])
 
-
+  echo "temp"

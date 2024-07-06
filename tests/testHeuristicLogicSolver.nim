@@ -128,5 +128,18 @@ suite "heuristicLogicSolver Tests":
       rsec2: seq[int] = nameSections(rightMostJustification(line2, hint2))
       correctAnswer2: seq[CellState] = @[white, black, black, white, unknown, unknown, unknown, unknown, unknown, unknown, unknown, white, black, 
                                          black, unknown, unknown, unknown, black, unknown, unknown, unknown, unknown, white, unknown, white, black]
+      line3: seq[CellState] = @[
+        black, black, white, unknown, white, unknown, unknown, unknown, unknown, unknown, 
+        unknown, unknown, black, white, unknown, white, unknown, white, unknown, unknown, 
+        unknown, unknown, unknown, unknown, unknown, unknown, white, black, white]
+      hint3: seq[int] = @[2, 1, 2, 2, 2, 2, 1]
+      lsec3: seq[int] = nameSections(leftMostJustification(line3, hint3))
+      rsec3: seq[int] = nameSections(rightMostJustification(line3, hint3))
+      correctAnswer3: seq[CellState] = @[
+        black, black, white, unknown, white, unknown, unknown, unknown, unknown, unknown,
+        unknown, unknown, black, white, white, white, white, white, unknown, unknown,
+        unknown, unknown, unknown, unknown, unknown, unknown, white, black, white]
     check(sectionMatch(line1, hint1, lsec1, rsec1) == correctAnswer1)
     check(sectionNearBoundaries(line2, hint2, lsec2, rsec2) == correctAnswer2)
+    check(sectionConsecutiveUnknowns(line3, hint3, lsec3, rsec3) == correctAnswer3)
+
