@@ -12,6 +12,7 @@ import ../[utils, nonogram, workTable]
 
 type
   HeuristicPreprocessingSolver* = ref object of NonogramSolver
+  HeuristicLogicSolver* = ref object of NonogramSolver
 
 proc newHeuristicPreprocessingSolver*(workTable: WorkTable): HeuristicPreprocessingSolver = 
   result = HeuristicPreprocessingSolver(workTable: workTable)
@@ -20,6 +21,15 @@ proc newHeuristicPreprocessingSolver*(workTable: WorkTable): HeuristicPreprocess
 proc newHeuristicPreprocessingSolver*(filePath: string): HeuristicPreprocessingSolver = 
   var wt: WorkTable = newWorkTable(filePath)
   result = HeuristicPreprocessingSolver(workTable: wt)
+  return result
+
+proc newHeuristicLogicSolver*(workTable: WorkTable): HeuristicLogicSolver = 
+  result = HeuristicLogicSolver(workTable: workTable)
+  return result
+
+proc newHeuristicLogicSolver*(filePath: string): HeuristicLogicSolver = 
+  var wt: WorkTable = newWorkTable(filePath)
+  result = HeuristicLogicSolver(workTable: wt)
   return result
 
 proc preprocessingLine*(workTable: var WorkTable, lineIndex: int, asRow: bool) = 
@@ -444,7 +454,13 @@ proc sectionMethods*(line: seq[CellState], hint: seq[int]): seq[CellState] =
   result = sectionConsecutiveUnknowns(result, hint, lsec, rsec)
 
   return result
-  
+
+
+## solve procedures for a HeuristicLogicSolver type.
+## This applies logistic ad hoc heuristic methods until this cannot color any cells.
+method solve*(solver: HeuristicLogicSolver): bool = 
+  return solver.workTable.nonogram.isSolved()
+
 
 when isMainModule:
   echo "Use case 1"
