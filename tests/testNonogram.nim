@@ -10,10 +10,21 @@ import NimNonogrampkg/[nonogram, constants]
 
 suite "Nonogram Tests":
 
+  test "correct rowHint, colHint, and lineHint":
+    let
+      rowHints = @[@[2], @[2, 1], @[1, 1], @[3], @[1, 1]]
+      colHints = @[@[2], @[2, 1], @[1, 1], @[3], @[1, 1]]
+      n = newNonogram(5, 5, rowHints, colHints)
+    check(n.rowHint(0) == @[2])
+    check(n.colHint(4) == @[1, 1])
+    check(n.lineHint(1, true) == @[2, 1])
+    check(n.lineHint(3, false) == @[3])
+
   test "correct countStateInRow":
-    var rowHints = @[@[2], @[2, 1], @[1, 1], @[3], @[1, 1]]
-    var colHints = @[@[2], @[2, 1], @[1, 1], @[3], @[1, 1]]
-    var n = newNonogram(5, 5, rowHints, colHints)
+    var
+      rowHints = @[@[2], @[2, 1], @[1, 1], @[3], @[1, 1]]
+      colHints = @[@[2], @[2, 1], @[1, 1], @[3], @[1, 1]]
+      n = newNonogram(5, 5, rowHints, colHints)
     n.grid[0][0] = CellState.black
     n.grid[0][1] = CellState.black
     n.grid[0][2] = CellState.white
@@ -24,24 +35,26 @@ suite "Nonogram Tests":
     check(countStateInRow(n, CellState.white, 0) == 1)
     check(countStateInRow(n, CellState.unknown, 0) == 1)
 
-  test "correct countStateInColumn":
-    var rowHints = @[@[2], @[2, 1], @[1, 1], @[3], @[1, 1]]
-    var colHints = @[@[2], @[2, 1], @[1, 1], @[3], @[1, 1]]
-    var n = newNonogram(5, 5, rowHints, colHints)
+  test "correct countStateInCol":
+    var
+      rowHints = @[@[2], @[2, 1], @[1, 1], @[3], @[1, 1]]
+      colHints = @[@[2], @[2, 1], @[1, 1], @[3], @[1, 1]]
+      n = newNonogram(5, 5, rowHints, colHints)
     n.grid[0][0] = CellState.black
     n.grid[1][0] = CellState.black
     n.grid[2][0] = CellState.white
     n.grid[3][0] = CellState.unknown
     n.grid[4][0] = CellState.black
     
-    check(countStateInColumn(n, CellState.black, 0) == 3)
-    check(countStateInColumn(n, CellState.white, 0) == 1)
-    check(countStateInColumn(n, CellState.unknown, 0) == 1)
+    check(countStateInCol(n, CellState.black, 0) == 3)
+    check(countStateInCol(n, CellState.white, 0) == 1)
+    check(countStateInCol(n, CellState.unknown, 0) == 1)
 
   test "correct countStateInGrid":
-    var rowHints = @[@[2], @[2, 1], @[1, 1], @[3], @[1, 1]]
-    var colHints = @[@[2], @[2, 1], @[1, 1], @[3], @[1, 1]]
-    var n = newNonogram(5, 5, rowHints, colHints)
+    var
+      rowHints = @[@[2], @[2, 1], @[1, 1], @[3], @[1, 1]]
+      colHints = @[@[2], @[2, 1], @[1, 1], @[3], @[1, 1]]
+      n = newNonogram(5, 5, rowHints, colHints)
     n.grid[0][0] = CellState.black
     n.grid[1][1] = CellState.black
     n.grid[2][2] = CellState.white
@@ -53,9 +66,10 @@ suite "Nonogram Tests":
     check(countStateInGrid(n, CellState.unknown) == 25 - 4)
 
   test "toString produces correct output":
-    var rowHints = @[@[], @[1]]
-    var colHints = @[@[1], @[]]
-    var n = newNonogram(2, 2, rowHints, colHints)
+    var
+      rowHints = @[@[], @[1]]
+      colHints = @[@[1], @[]]
+      n = newNonogram(2, 2, rowHints, colHints)
     n.grid[0][0] = CellState.black
     n.grid[0][1] = CellState.white
     n.grid[1][0] = CellState.unknown
@@ -75,13 +89,15 @@ suite "Nonogram Tests":
     check(non.colHints == @[@[4], @[6], @[2, 1, 2], @[1, 1, 1], @[1, 1, 1], @[2, 1, 2], @[3, 2], @[2, 1]])
 
   test "check checkMinimalHints":
-    var rowHints = @[@[2, 2], @[2, 1], @[1, 1], @[3], @[1, 1]]
-    var colHints = @[@[2], @[2, 1], @[1, 1], @[3], @[1, 1]]
+    var
+      rowHints = @[@[2, 2], @[2, 1], @[1, 1], @[3], @[1, 1]]
+      colHints = @[@[2], @[2, 1], @[1, 1], @[3], @[1, 1]]
     discard newNonogram(5, 5, rowHints, colHints)
 
   test "checkMinimalHints raises exception on invalid hints":
-    var rowHints = @[@[2, 3], @[2, 1], @[1, 1], @[6], @[1, 1]]  # Invalid row hint
-    var colHints = @[@[2], @[2, 1], @[1, 1], @[3], @[1, 1]]
+    var
+      rowHints = @[@[2, 3], @[2, 1], @[1, 1], @[6], @[1, 1]]  # Invalid row hint
+      colHints = @[@[2], @[2, 1], @[1, 1], @[3], @[1, 1]]
     expect ValueError:
       discard newNonogram(5, 5, rowHints, colHints)
 
