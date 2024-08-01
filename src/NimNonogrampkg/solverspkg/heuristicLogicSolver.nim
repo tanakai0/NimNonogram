@@ -8,7 +8,7 @@ Proc of the 2007 IEEE Symposium on Computational Intelligence and Games, 2007.
 import std/[algorithm, macros]
 import math
 import solvers
-import ../[utils, nonogram, workTable]
+import ../[utils, nonogram, workTable, coloringLog]
 
 type
   HeuristicPreprocessingSolver* = ref object of NonogramSolver
@@ -497,64 +497,17 @@ method solve*(solver: HeuristicLogicSolver): bool =
     updatedLine = sectionMethods(solver.workTable.nonogram.getLine(lineIndex, asRow),
                                  solver.workTable.nonogram.lineHint(lineIndex, asRow))
     updatedNum = solver.workTable.updateLineStates(lineIndex, updatedLine, asRow)
+    for (row, col, color) in solver.workTable.coloringLog.getLastN(updatedNum):
+      if solver.workTable.nonogram.countStateInRow(unknown, row) != 0:
+        rowIndicesToCheck.incl(int16(row))
+      if solver.workTable.nonogram.countStateInCol(unknown, col) != 0:
+        colIndicesToCheck.incl(int16(col))
     if asRow:
       rowIndicesToCheck.excl(int16(lineIndex))
     else:
       colIndicesToCheck.excl(int16(lineIndex))
-    
-    
-    
-  
 
   return solver.workTable.nonogram.isSolved()
-
-
-#[
-    while num_lines_1 != 0 and is_inconsistent == False:
-        # print("{} ".format(num_lines_1),end = "")
-        # decide a line to be filled
-        target = _select_line__logic_adhoc_heuristic(puzzle, check)  # target = (row_or_col, pos, num_blanks)
-        update_indexes = []
-        is_update = False
-        for f in methods:
-            new_line = f(puzzle.copy_line(target[1], target[0]), puzzle.get_dl(target[1], target[0]),
-                                                puzzle.black, puzzle.white, puzzle.blank)
-            if new_line == -1:  # there is an inconsitency or there isn't pattern that fill this line
-                is_inconsistent = True
-                break
-            temp_n = puzzle.set_line(target[1], new_line, target[0])
-            if temp_n > 0:
-                is_update = True
-            copy_order = puzzle.copy_order()
-            update_indexes += list(islice(copy_order, len(copy_order) - temp_n, len(copy_order)))
-            num_update += temp_n
-        # update check (dictionary)
-        row_indexes_set, col_indexes_set = set(), set()
-        for c in update_indexes:
-            row_indexes_set.add(c[0])
-            col_indexes_set.add(c[1])
-        for i in row_indexes_set:
-            if check['r'][i] == 2:
-                check['r'][i] = 1
-        for j in col_indexes_set:
-            if check['c'][j] == 2:
-                check['c'][j] = 1
-        if is_update == False:
-            check[target[0]][target[1]] = 2
-        for i in range(puzzle.m):
-            if puzzle.get_rr(i) == 0:
-                check['r'][i] = 3
-        for j in range(puzzle.n):
-            if puzzle.get_rc(j) == 0:
-                check['c'][j] = 3
-        num_lines_1  = list(check['r'].values()).count(1) + list(check['c'].values()).count(1)
-    
-    if is_inconsistent == True:  # if there is an inconsistency
-        puzzle.delete_order(num_update)
-        return -1
-    else:
-        return num_update
-]#
 
 
 when isMainModule:
