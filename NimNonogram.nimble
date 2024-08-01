@@ -14,5 +14,8 @@ bin           = @["NimNonogram"]
 requires "nim >= 2.0.4"
 
 # tasks
+# `nimble tasks`
+
+# `nimble task CLIsolve`
 task CLIsolve, "This is a test of CLI":
-  exec "NimNonogram.exe --solve:db/example.non"
+  exec ".\\NimNonogram.exe --solve:db/example.non"
