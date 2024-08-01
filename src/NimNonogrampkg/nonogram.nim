@@ -26,6 +26,15 @@ proc rowHints*(n: Nonogram): seq[seq[int]] {.inline.} =
   n.rowHints
 proc colHints*(n: Nonogram): seq[seq[int]] {.inline.} =
   n.colHints
+proc rowHint*(n: Nonogram, row: int): seq[int] {.inline.} =
+  n.rowHints[row]
+proc colHint*(n: Nonogram, col: int): seq[int] {.inline.} =
+  n.colHints[col]
+proc lineHint*(n: Nonogram, lineIndex: int, asRow: bool): seq[int] {.inline.} =
+  if asRow:
+    return n.rowHint(lineIndex)
+  else:
+    return n.colHint(lineIndex)
 
 
 ## setCellState attempts to set the state of a specified cell in the Nonogram grid.
@@ -40,7 +49,8 @@ proc colHints*(n: Nonogram): seq[seq[int]] {.inline.} =
 ## - state: The desired state to set the cell.
 ##
 ## Returns:
-## - bool: True if the cell state was successfully changed, false otherwise.
+## - bool: True if the cell state was successfully changed, false otherwise. 
+## Apparent contradiction raises an exception. So, this value regards to the number of newely filled cells. 
 proc setCellState*(nonogram: var Nonogram, row: int, col: int, state: CellState): bool = 
   if state == unknown:
     return false
@@ -178,7 +188,7 @@ proc countStateInRow*(n: Nonogram, state: CellState, i : int): int =
   return result
 
 ## countStateInRow counts the number of specific state in a column.
-proc countStateInColumn*(n: Nonogram, state: CellState, j : int): int = 
+proc countStateInCol*(n: Nonogram, state: CellState, j : int): int = 
   for i in 0..<n.numRows:
     if n.grid[i][j] == state:
       result += 1
@@ -192,11 +202,18 @@ proc countStateInGrid*(n: Nonogram, state: CellState): int =
         result += 1
   return result
 
-proc getCol*(grid: seq[seq[CellState]], col: int): seq[CellState] =
-  result = newSeqOfCap[CellState](grid.len)
-  for row in grid:
+proc getCol*(nono: Nonogram, col: int): seq[CellState] =
+  result = newSeqOfCap[CellState](nono.numRows)
+  for row in nono.grid:
     result.add(row[col])
+  return result
 
+proc getLine*(nono: Nonogram, lineIndex: int, asRow: bool): seq[CellState] =
+  if asRow:
+    result = nono.grid[lineIndex]
+  else:
+    result = nono.getCol(lineIndex)
+  return result
 
 when isMainModule:
   import constants
