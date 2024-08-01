@@ -143,3 +143,11 @@ suite "heuristicLogicSolver Tests":
     check(sectionNearBoundaries(line2, hint2, lsec2, rsec2) == correctAnswer2)
     check(sectionConsecutiveUnknowns(line3, hint3, lsec3, rsec3) == correctAnswer3)
 
+test "solve*(solver: HeuristicLogicSolver): bool":
+  var solver1: HeuristicPreprocessingSolver = newHeuristicPreprocessingSolver(constants.ExamplePuzzlePath)
+  discard solver1.solve()
+  echo solver1.workTable.nonogram.toString()
+  # var solver2: HeuristicLogicSolver = newHeuristicLogicSolver(solver1.workTable)
+  # discard solver2.solve()
+  # echo solver2.workTable.nonogram.toString()
+
