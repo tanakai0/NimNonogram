@@ -29,7 +29,7 @@ proc isSolved*(nono: Nonogram): bool =
     if line2hint(nono.grid[i]) != nono.rowHints[i]:
       return false
   for i in 0..<nono.numCols:
-    if line2hint(nono.grid.getCol(i)) != nono.colHints[i]:
+    if line2hint(nono.getCol(i)) != nono.colHints[i]:
       return false
   return true
 
