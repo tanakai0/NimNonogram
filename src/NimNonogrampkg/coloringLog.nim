@@ -16,4 +16,6 @@ proc newColoringLog*(n: Nonogram): ColoringLog =
   return result
 
 proc push*(coloringLog: var ColoringLog, row: int, col: int, color: CellState) = 
+  if color == unknown:
+    raise newException(ValueError, "ColoringLog cannot contain unknown.")
   coloringLog.addLast((row: row, col: col, color: color))
