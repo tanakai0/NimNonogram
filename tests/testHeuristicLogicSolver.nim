@@ -1,4 +1,4 @@
-import std/unittest
+import std/unittest, strutils
 import NimNonogrampkg/[constants, nonogram, workTable, utils]
 import NimNonogrampkg/solverspkg/heuristicLogicSolver
 
@@ -146,8 +146,6 @@ suite "heuristicLogicSolver Tests":
 test "solve*(solver: HeuristicLogicSolver): bool":
   var solver1: HeuristicPreprocessingSolver = newHeuristicPreprocessingSolver(constants.ExamplePuzzlePath)
   discard solver1.solve()
-  echo solver1.workTable.nonogram.toString()
-  # var solver2: HeuristicLogicSolver = newHeuristicLogicSolver(solver1.workTable)
-  # discard solver2.solve()
-  # echo solver2.workTable.nonogram.toString()
-
+  var solver2: HeuristicLogicSolver = newHeuristicLogicSolver(solver1.workTable)
+  check(solver2.solve() == true)
+  check(solver2.workTable.nonogram.grid2GoalPattern() == utils.loadGoalFromDB(constants.ExamplePuzzlePath))
