@@ -1,12 +1,13 @@
 import std/strutils
 import math
+import constants
 
 ## CellState represents the state of a cell in the Nonogram puzzle.
 type
   CellState* = enum
-    white = 0  # The cell is white (empty).
-    black = 1  # The cell is black (filled).
-    unknown = 2  # The cell's state is not yet determined.
+    white = constants.WhiteSymbol
+    black = constants.BlackSymbol
+    unknown = constants.UnknownSymbol
 
 ## Nonogram represents the Nonogram puzzle.
 type
@@ -216,7 +217,6 @@ proc getLine*(nono: Nonogram, lineIndex: int, asRow: bool): seq[CellState] =
   return result
 
 when isMainModule:
-  import constants
   var
     non: Nonogram = loadPuzzle(constants.ExamplePuzzlePath)
   echo non.numRows
