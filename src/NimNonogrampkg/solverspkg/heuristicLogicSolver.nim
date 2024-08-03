@@ -158,7 +158,7 @@ proc enumerateAllColoring*(line: seq[CellState], hint: seq[int], pos: int = 0, h
     # When all elements of the hint was adopted.
     if hintIndex == len(hint):
       # If the solution is valid, then yield it.
-      if (not templine.contains(unknown)) and (utils.line2hint(tempLine) == hint):
+      if (not templine.contains(unknown)) and (utils.line2Hint(tempLine) == hint):
         yield tempLine
         
     # When some elements of the description wasn't adopted.
@@ -498,9 +498,7 @@ method solve*(solver: HeuristicLogicSolver): bool =
       colIndicesToCheck.incl(int16(col))
   
   while (rowIndicesToCheck != {}) or (colIndicesToCheck != {}):
-    echo "rowIndicesToCheck: ", rowIndicesToCheck, "\ncolIndicesToCheck: ", colIndicesToCheck
     (lineIndex, asRow) = selectCellToFill(solver.workTable.nonogram, rowIndicesToCheck, colIndicesToCheck)
-    echo "lineIndex: ", lineIndex, "\nasRow: ", asRow
     updatedLine = sectionMethods(solver.workTable.nonogram.getLine(lineIndex, asRow),
                                  solver.workTable.nonogram.lineHint(lineIndex, asRow))
     updatedLine = enumerateAndFillConsensusColors(updatedLine, 
