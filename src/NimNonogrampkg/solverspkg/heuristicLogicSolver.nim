@@ -460,17 +460,22 @@ proc sectionMethods*(line: seq[CellState], hint: seq[int]): seq[CellState] =
 proc selectCellToFill*(nono: Nonogram, rowIndicesToCheck: set[int16], colIndicesToCheck: set[int16]): (int, bool) = 
   var
     maxUnknownNum: int = 0
+    lineUnknownNum: int
     asRow: bool = false
     lineIndex: int = -1
 
-  for row in 0 ..< nono.numRows:
-    if maxUnknownNum < nono.countStateInRow(unknown, row):
+  for row in rowIndicesToCheck:
+    lineUnknownNum = nono.countStateInRow(unknown, row)
+    if maxUnknownNum < lineUnknownNum:
       asRow = true
       lineIndex = row
-  for col in 0 ..< nono.numCols:
-    if maxUnknownNum < nono.countStateInCol(unknown, col):
+      maxUnknownNum = lineUnknownNum
+  for col in colIndicesToCheck:
+    lineUnknownNum = nono.countStateInCol(unknown, col)
+    if maxUnknownNum < lineUnknownNum:
       asRow = false
       lineIndex = col
+      maxUnknownNum = lineUnknownNum
 
   return (lineIndex, asRow)
 
@@ -492,21 +497,30 @@ method solve*(solver: HeuristicLogicSolver): bool =
     if solver.workTable.nonogram.countStateInCol(unknown, col) != 0:
       colIndicesToCheck.incl(int16(col))
   
-  while (rowIndicesToCheck != {}) and (colIndicesToCheck != {}):
+  while (rowIndicesToCheck != {}) or (colIndicesToCheck != {}):
+    echo "rowIndicesToCheck: ", rowIndicesToCheck, "\ncolIndicesToCheck: ", colIndicesToCheck
     (lineIndex, asRow) = selectCellToFill(solver.workTable.nonogram, rowIndicesToCheck, colIndicesToCheck)
+    echo "lineIndex: ", lineIndex, "\nasRow: ", asRow
     updatedLine = sectionMethods(solver.workTable.nonogram.getLine(lineIndex, asRow),
                                  solver.workTable.nonogram.lineHint(lineIndex, asRow))
+    updatedLine = enumerateAndFillConsensusColors(updatedLine, 
+                                                  solver.workTable.nonogram.lineHint(lineIndex, asRow))
     updatedNum = solver.workTable.updateLineStates(lineIndex, updatedLine, asRow)
-    for (row, col, color) in solver.workTable.coloringLog.getLastN(updatedNum):
-      if solver.workTable.nonogram.countStateInRow(unknown, row) != 0:
-        rowIndicesToCheck.incl(int16(row))
-      if solver.workTable.nonogram.countStateInCol(unknown, col) != 0:
-        colIndicesToCheck.incl(int16(col))
+
     if asRow:
       rowIndicesToCheck.excl(int16(lineIndex))
+      for (row, col, color) in solver.workTable.coloringLog.getLastN(updatedNum):
+        if solver.workTable.nonogram.countStateInCol(unknown, col) == 0:
+          colIndicesToCheck.excl(int16(col))
+        else:
+          colIndicesToCheck.incl(int16(col))
     else:
       colIndicesToCheck.excl(int16(lineIndex))
-
+      for (row, col, color) in solver.workTable.coloringLog.getLastN(updatedNum):
+        if solver.workTable.nonogram.countStateInRow(unknown, row) == 0:
+          rowIndicesToCheck.excl(int16(row))
+        else:
+          rowIndicesToCheck.incl(int16(row))
   return solver.workTable.nonogram.isSolved()
 
 
@@ -531,3 +545,10 @@ when isMainModule:
   echo nameSections(@[black, black, white, white, black, black, black])
 
   echo "temp"
+  import ../constants
+  var solver1: HeuristicPreprocessingSolver = newHeuristicPreprocessingSolver(constants.ExamplePuzzlePath)
+  discard solver1.solve()
+  echo solver1.workTable.nonogram.toString()
+  var solver2: HeuristicLogicSolver = newHeuristicLogicSolver(solver1.workTable)
+  discard solver2.solve()
+  echo solver2.workTable.nonogram.toString()
